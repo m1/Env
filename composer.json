@@ -1,6 +1,6 @@
 {
     "name": "m1/env",
-    "description": ":package_description",
+    "description": "Env is a lightweight library bringing .env file parser compatibility to PHP. In short - it enables you to read .env files with PHP.",
     "keywords": [
         "m1",
         "env",
