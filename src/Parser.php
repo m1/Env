@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  *
  * @package     m1/env
- * @version     0.1.0
+ * @version     0.2.0
  * @author      Miles Croxford <hello@milescroxford.com>
  * @copyright   Copyright (c) Miles Croxford <hello@milescroxford.com>
  * @license     http://github.com/m1/env/blob/master/LICENSE.md
@@ -19,83 +19,43 @@
 namespace M1\Env;
 
 use M1\Env\Exception\ParseException;
+use M1\Env\Parser\AbstractParser;
+use M1\Env\Parser\ValueParser;
+use M1\Env\Parser\KeyParser;
 
 /**
  * The .env parser
  *
  * @since 0.1.0
  */
-class Parser
+class Parser extends AbstractParser
 {
     /**
-     * The regex to get variables '$(VARIABLE)' in .env
-     * Unescaped: ${(.*?)}
+     * The Env key parser
      *
-     * @var string REGEX_ENV_VARIABLE
+     * @var \M1\Env\Parser\KeyParser $key_parser
      */
-    const REGEX_ENV_VARIABLE = '\\${(.*?)}';
+    private $key_parser;
 
     /**
-     * The regex to get the content between double quote (") strings, ignoring escaped quotes.
-     * Unescaped: "(?:[^"\\]*(?:\\.)?)*"
+     * The Env value parser
      *
-     * @var string REGEX_QUOTE_DOUBLE_STRING
+     * @var \M1\Env\Parser\ValueParser $value_parser
      */
-    const REGEX_QUOTE_DOUBLE_STRING = '"(?:[^\"\\\\]*(?:\\\\.)?)*\"';
-
-    /**
-     * The regex to get the content between single quote (') strings, ignoring escaped quotes
-     * Unescaped: '(?:[^'\\]*(?:\\.)?)*'
-     *
-     * @var string REGEX_QUOTE_SINGLE_STRING
-     */
-    const REGEX_QUOTE_SINGLE_STRING = "'(?:[^'\\\\]*(?:\\\\.)?)*'";
-
-    /**
-     * The bool variants available in .env
-     *
-     * @var array $bool_variants
-     */
-    private static $bool_variants = array(
-        'true', 'false', 'yes', 'no'
-    );
-
-    /**
-     * The map to convert escaped characters into real characters
-     *
-     * @var array $character_map
-     */
-    private static $character_map = array(
-        "\\n" => "\n",
-        "\\\"" => "\"",
-        '\\\'' => "'",
-        '\\t' => "\t"
-    );
-
-    /**
-     * The .env to parse
-     *
-     * @var string $file
-     */
-    private $file;
-
-    /**
-     * If to throw ParseException in the .env
-     *
-     * @var bool $origin_exception
-     */
-    private $origin_exception;
+    private $value_parser;
 
     /**
      * The parser constructor
      *
-     * @param string $file The .env to parse
-     * @param bool   $origin_exception  Whether or not to throw ParseException in the .env
+     * @param string $file             The .env to parse
+     * @param bool   $origin_exception Whether or not to throw ParseException in the .env
      */
     public function __construct($file, $origin_exception = false)
     {
-        $this->file = $file;
-        $this->origin_exception = $origin_exception;
+        parent::__construct($file, $origin_exception);
+
+        $this->key_parser = new KeyParser($file, $origin_exception);
+        $this->value_parser = new ValueParser($file, $origin_exception);
     }
 
     /**
@@ -134,320 +94,61 @@ class Parser
             if ($this->startsWith('#', $raw_line) || !$raw_line) {
                 continue;
             }
-            
-            $key_value = explode("=", $raw_line, 2);
 
-            if (empty($key_value)) {
-                continue;
-            } elseif (count($key_value) !== 2) {
-                throw new ParseException(
-                    'You must have a key = value',
-                    $this->origin_exception,
-                    $this->file,
-                    $raw_line,
-                    $line_num
-                );
-            }
-
-            $key = $this->parseKey($key_value[0], $line_num);
-
-            if (is_string($key)) {
-                $lines[$key] = $this->parseValue($key_value[1], $lines, $line_num);
-            }
+            $lines = $this->parseLine($raw_line, $line_num, $lines);
         }
 
         return $lines;
     }
 
     /**
-     * Parses a .env key
+     * Parses a line of the .env
      *
-     * @param string $key      The key string
-     * @param int    $line_num The line num of the key
+     * @param string $raw_line The raw content of the line
+     * @param int    $line_num The line number of the line
+     * @param array  $lines    The parsed lines
      *
-     * @throws \M1\Env\Exception\ParseException If key contains a character that isn't alphanumeric or a _
-     *
-     * @return string|false The parsed key, or false if the key is a comment
+     * @return array The parsed lines
      */
-    private function parseKey($key, $line_num)
+    private function parseLine($raw_line, $line_num, $lines)
     {
-        $key = trim($key);
+        list($key, $value) = $this->parseKeyValue($raw_line, $line_num);
 
-        if ($this->startsWith('#', $key)) {
-            return false;
+        $key = $this->key_parser->parse($key, $line_num);
+
+        if (!is_string($key)) {
+            return $lines;
         }
 
-        if (!ctype_alnum(str_replace('_', '', $key))) {
+        $lines[$key] = $this->value_parser->parse($value, $lines, $line_num);
+
+        return $lines;
+    }
+
+    /**
+     * Gets the key = value items from the line
+     *
+     * @param string $raw_line The raw content of the line
+     * @param int    $line_num The line number of the line
+     *
+     * @throws \M1\Env\Exception\ParseException If the line does not have a key=value structure
+     *
+     * @return array The parsed lines
+     */
+    private function parseKeyValue($raw_line, $line_num)
+    {
+        $key_value = explode("=", $raw_line, 2);
+
+        if (count($key_value) !== 2) {
             throw new ParseException(
-                sprintf('Key can only contain alphanumeric and underscores: %s', $key),
+                'You must have a key = value',
                 $this->origin_exception,
                 $this->file,
-                $key,
+                $raw_line,
                 $line_num
             );
         }
 
-        return $key;
-    }
-
-    /**
-     * Parses a .env value
-     *
-     * @param string $value    The value to parse
-     * @param array  $lines    The array of already parsed lines
-     * @param int    $line_num The line num of the value
-     *
-     * @return string|null The parsed key, or null if the key is a comment
-     */
-    private function parseValue($value, $lines, $line_num)
-    {
-        $value = trim($value);
-
-        if ($this->startsWith('#', $value)) {
-            return null;
-        }
-
-        if ($this->isString($value)) {
-            $value = $this->parseString($value, $line_num);
-            $value = $this->parseVariables($value, $lines, $line_num, true);
-
-        } else {
-            $value = $this->stripComments($value);
-
-            if ($this->isBool($value)) {
-                $value = $this->parseBool($value);
-
-            } elseif ($this->isNumber($value)) {
-                $value = $this->parseNumber($value);
-
-            } elseif ($this->isNull($value)) {
-                $value = null;
-
-            } else {
-                $value = $this->parseUnquotedString($value);
-                $value = $this->parseVariables($value, $lines, $line_num);
-
-            }
-        }
-
-        return $value;
-    }
-
-    /**
-     * Parses a .env variable
-     *
-     * @param string $value         The value to parse
-     * @param array  $lines         The array of already parsed lines
-     * @param int    $line_num      The line num of the value
-     * @param bool   $quoted_string Is the value in a quoted string
-     *
-     * @throws \M1\Env\Exception\ParseException If the variable hasn't been defined
-     *
-     * @return string The parsed value
-     */
-    private function parseVariables($value, $lines, $line_num, $quoted_string = false)
-    {
-        preg_match_all('/'.self::REGEX_ENV_VARIABLE.'/', $value, $matches);
-
-        if (isset($matches[0]) && !empty($matches[0])) {
-            $replacements = array();
-
-            for ($i = 0; $i <= (count($matches[0]) - 1); $i++) {
-                $variable_name = $matches[1][$i];
-                $str_to_replace = $matches[0][$i];
-
-                if (!isset($lines[$variable_name])) {
-                    throw new ParseException(
-                        sprintf('Variable has not been defined: %s', $variable_name),
-                        $this->origin_exception,
-                        $this->file,
-                        $value,
-                        $line_num
-                    );
-                }
-
-                $replacement = $lines[$variable_name];
-
-                if (count($matches[0]) === 1 &&
-                    $value === $str_to_replace &&
-                    !$quoted_string
-                ) {
-                    return $replacement;
-                } elseif (is_bool($replacement) &&
-                    ($quoted_string || count($matches[0] > 2))
-                ) {
-                    $replacement = ($replacement) ? 'true' : 'false';
-                }
-
-                $replacements[$str_to_replace] = $replacement;
-            }
-
-            if (!empty($replacements)) {
-                $value = strtr($value, $replacements);
-            }
-        }
-
-        return $value;
-    }
-
-    /**
-     * Parses a .env string
-     *
-     * @param string $value    The value to parse
-     * @param int    $line_num The line num of the value
-     *
-     * @throws \M1\Env\Exception\ParseException If the string has a missing end quote
-     *
-     * @return string The parsed string
-     */
-    private function parseString($value, $line_num)
-    {
-        if ($this->startsWith('\'', $value)) {
-            $regex =  self::REGEX_QUOTE_SINGLE_STRING;
-            $symbol = "'";
-        } else {
-            $regex = self::REGEX_QUOTE_DOUBLE_STRING;
-            $symbol = '"';
-        }
-
-        if (!preg_match('/'.$regex.'/', $value, $matches)) {
-            throw new ParseException(
-                sprintf('Missing end %s quote', $symbol),
-                $this->origin_exception,
-                $this->file,
-                $value,
-                $line_num
-            );
-        };
-
-        $value = trim($matches[0], $symbol);
-        $value = strtr($value, self::$character_map);
-
-        return $value;
-    }
-
-    /**
-     * Parses a .env unquoted string
-     *
-     * @param string $value The value to parse
-     *
-     * @return string The parsed string
-     */
-    private function parseUnquotedString($value)
-    {
-        if ($value == "") {
-            return null;
-        }
-
-        return $value;
-    }
-
-    /**
-     * Parses a .env bool
-     *
-     * @param string $value The value to parse
-     *
-     * @return bool The parsed bool
-     */
-    private function parseBool($value)
-    {
-        switch (strtolower($value)) {
-            case 'true':
-            case 'yes':
-                return true;
-            case 'false':
-            case 'no':
-            default:
-                return false;
-        }
-    }
-
-    /**
-     * Parses a .env number
-     *
-     * @param string $value The value to parse
-     *
-     * @return int|float The parsed bool
-     */
-    private function parseNumber($value)
-    {
-        if (strpos($value, '.') !== false) {
-            return (float) $value;
-        }
-
-        return (int) $value;
-    }
-
-    /**
-     * Strips comments from a value
-     *
-     * @param string $value The value to strip comments from
-     *
-     * @return string value
-     */
-    private function stripComments($value)
-    {
-        return trim(explode("#", $value, 2)[0]);
-    }
-
-    /**
-     * Returns if value is a string
-     *
-     * @param string $value The value to test
-     *
-     * @return bool Is a value a string
-     */
-    private function isString($value)
-    {
-        return $this->startsWith('\'', $value) || $this->startsWith('"', $value);
-    }
-
-    /**
-     * Returns if value is a bool
-     *
-     * @param string $value The value to test
-     *
-     * @return bool Is a value a bool
-     */
-    private function isBool($value)
-    {
-        return in_array(strtolower($value), self::$bool_variants);
-    }
-
-    /**
-     * Returns if value is number
-     *
-     * @param string $value The value to test
-     *
-     * @return bool Is a value a number
-     */
-    private function isNumber($value)
-    {
-        return is_numeric($value);
-    }
-
-    /**
-     * Returns if value is null
-     *
-     * @param string $value The value to test
-     *
-     * @return bool Is a value null
-     */
-    private function isNull($value)
-    {
-        return $value === 'null';
-    }
-
-    /**
-     * Returns if value starts with a value
-     *
-     * @param string $value The value to search for
-     * @param string $line  The line to test
-     *
-     * @return bool Returns if the line starts with value
-     */
-    private function startsWith($string, $line)
-    {
-        return $string === "" || strrpos($line, $string, -strlen($line)) !== false;
+        return $key_value;
     }
 }
