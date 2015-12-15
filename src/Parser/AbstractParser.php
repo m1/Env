@@ -54,8 +54,8 @@ abstract class AbstractParser
     /**
      * Returns if value starts with a value
      *
-     * @param string $value The value to search for
-     * @param string $line  The line to test
+     * @param string $string The value to search for
+     * @param string $line   The line to test
      *
      * @return bool Returns if the line starts with value
      */

@@ -152,7 +152,7 @@ The MIT License (MIT). Please see [License File](LICENSE.md) for more informatio
 
 [link-packagist]: https://packagist.org/packages/m1/Env
 [link-travis]: https://travis-ci.org/m1/Env
-[link-scrutinizer]: https://scrutinizer-ci.com/g/:vendor/Env/code-structure
+[link-scrutinizer]: https://scrutinizer-ci.com/g/m1/Env/code-structure
 [link-code-quality]: https://scrutinizer-ci.com/g/m1/Env
 [link-downloads]: https://packagist.org/packages/m1/Env
 [link-author]: https://github.com/m1

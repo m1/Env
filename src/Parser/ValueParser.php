@@ -19,6 +19,7 @@
 namespace M1\Env\Parser;
 
 use M1\Env\Exception\ParseException;
+use M1\Env\Traits\ValueTypeCheckable;
 
 /**
  * The value parser for Env
@@ -27,6 +28,11 @@ use M1\Env\Exception\ParseException;
  */
 class ValueParser extends AbstractParser
 {
+    /**
+     * The trait for checking types
+     */
+    use ValueTypeCheckable;
+
     /**
      * The regex to get variables '$(VARIABLE)' in .env
      * Unescaped: ${(.*?)}
@@ -106,30 +112,36 @@ class ValueParser extends AbstractParser
             return null;
         }
 
-        if ($this->isString($value)) {
-            $value = $this->parseString($value);
-            $value = $this->parseVariables($value, true);
+        return $this->parseValue($value);
+    }
 
-        } else {
-            $value = $this->stripComments($value);
+    /**
+     * Parses a .env value
+     *
+     * @param string $value The value to parse
+     *
+     * @return string|null The parsed value, or null if the value is null
+     */
+    private function parseValue($value)
+    {
+        $types = array('string', 'bool', 'number', 'null');
 
-            if ($this->isBool($value)) {
-                $value = $this->parseBool($value);
+        foreach ($types as $type) {
+            $parsed_value = $value;
 
-            } elseif ($this->isNumber($value)) {
-                $value = $this->parseNumber($value);
+            if ($type !== 'string') {
+                $parsed_value = $this->stripComments($value);
+            }
 
-            } elseif ($this->isNull($value)) {
-                $value = null;
-
-            } else {
-                $value = $this->parseUnquotedString($value);
-                $value = $this->parseVariables($value);
-
+            $is_function = sprintf('is%s', ucfirst($type));
+            $parse_function = sprintf('parse%s', ucfirst($type));
+            
+            if ($this->$is_function($parsed_value)) {
+                return $this->$parse_function($parsed_value);
             }
         }
 
-        return $value;
+        return $this->parseUnquotedString($parsed_value);
     }
 
     /**
@@ -249,7 +261,19 @@ class ValueParser extends AbstractParser
         $value = trim($matches[0], $symbol);
         $value = strtr($value, self::$character_map);
 
-        return $value;
+        return $this->parseVariables($value, true);
+    }
+
+    /**
+     * Parses a .env null value
+     *
+     * @param string $value The value to parse
+     *
+     * @return null Null value
+     */
+    private function parseNull($value)
+    {
+        return null;
     }
 
     /**
@@ -265,7 +289,7 @@ class ValueParser extends AbstractParser
             return null;
         }
 
-        return $value;
+        return $this->parseVariables($value);
     }
 
     /**
@@ -318,67 +342,5 @@ class ValueParser extends AbstractParser
     private function stripComments($value)
     {
         return trim(explode("#", $value, 2)[0]);
-    }
-
-    /**
-     * Returns if value is a string
-     *
-     * @param string $value The value to test
-     *
-     * @return bool Is a value a string
-     */
-    private function isString($value)
-    {
-        return $this->startsWith('\'', $value) || $this->startsWith('"', $value);
-    }
-
-    /**
-     * Returns if value is a bool
-     *
-     * @param string $value The value to test
-     *
-     * @return bool Is a value a bool
-     */
-    private function isBool($value)
-    {
-        return in_array(strtolower($value), self::$bool_variants);
-    }
-
-    /**
-     * Returns if value is number
-     *
-     * @param string $value The value to test
-     *
-     * @return bool Is a value a number
-     */
-    private function isNumber($value)
-    {
-        return is_numeric($value);
-    }
-
-    /**
-     * Returns if value is null
-     *
-     * @param string $value The value to test
-     *
-     * @return bool Is a value null
-     */
-    private function isNull($value)
-    {
-        return $value === 'null';
-    }
-
-    /**
-     * Returns if variable value is a clone, e.g. BOOL = $(BOOL_1)
-     *
-     * @param string $value         The value to test
-     * @param array  $matches       The matches of the variables
-     * @param bool   $quoted_string If the value is in a quoted string
-     *
-     * @return bool Is a value null
-     */
-    private function isVariableClone($value, $matches, $quoted_string)
-    {
-        return count($matches[0] === 1) && $value == $matches[0][0] && !$quoted_string;
     }
 }
