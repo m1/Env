@@ -6,6 +6,7 @@
 [![Build Status][ico-travis]][link-travis]
 [![Coverage Status][ico-scrutinizer]][link-scrutinizer]
 [![Quality Score][ico-code-quality]][link-code-quality]
+[![Total Downloads][ico-downloads]][link-downloads]
 
 Env is a lightweight library bringing .env file parser compatibility to PHP. In short - it enables you to read .env files with PHP.
 
@@ -24,7 +25,7 @@ $ composer require m1/env
 ### Basic
 
 test.env
-```env
+```bash
 TEST_1 = VALUE
 ```
 
@@ -48,7 +49,7 @@ var_dump($arr);
 
 ### .env examples
 
-```env
+```bash
 # Comments are done like this
 
 # Standard key=value
