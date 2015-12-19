@@ -30,7 +30,7 @@
         "squizlabs/php_codesniffer": "^2.3"
     },
     "suggest": {
-        "m1/env": "~0.3"
+        "m1/vars": "~0.3"
     },
     "autoload": {
         "psr-4": {
