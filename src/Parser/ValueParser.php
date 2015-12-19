@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  *
  * @package     m1/env
- * @version     0.2.0
+ * @version     1.0.0
  * @author      Miles Croxford <hello@milescroxford.com>
  * @copyright   Copyright (c) Miles Croxford <hello@milescroxford.com>
  * @license     http://github.com/m1/env/blob/master/LICENSE.md
@@ -157,20 +157,11 @@ class ValueParser extends AbstractParser
         $matches = $this->fetchVariableMatches($value);
 
         if (is_array($matches)) {
-            $replacements = array();
-
             if ($this->isVariableClone($value, $matches, $quoted_string)) {
                 return $this->fetchVariable($value, $matches[1][0], $matches, $quoted_string);
             }
 
-            for ($i = 0; $i <= (count($matches[0]) - 1); $i++) {
-                $replacement = $this->fetchVariable($value, $matches[1][$i], $matches, $quoted_string);
-                $replacements[$matches[0][$i]] = $replacement;
-            }
-
-            if (!empty($replacements)) {
-                $value = strtr($value, $replacements);
-            }
+            $value = $this->doReplacements($value, $matches, $quoted_string);
         }
 
         return $value;
@@ -208,21 +199,11 @@ class ValueParser extends AbstractParser
      */
     private function fetchVariable($value, $variable_name, $matches, $quoted_string)
     {
-
-        if (!isset($this->lines[$variable_name])) {
-            throw new ParseException(
-                sprintf('Variable has not been defined: %s', $variable_name),
-                $this->origin_exception,
-                $this->file,
-                $value,
-                $this->line_num
-            );
-        }
+        $this->checkVariableExists($value, $variable_name, $this->lines);
 
         $replacement = $this->lines[$variable_name];
 
-        if (is_bool($replacement) &&
-            ($quoted_string || count($matches[0]) >= 2)) {
+        if ($this->isBoolInString($replacement, $quoted_string, count($matches[0]))) {
             $replacement = ($replacement) ? 'true' : 'false';
         }
 
@@ -230,24 +211,90 @@ class ValueParser extends AbstractParser
     }
 
     /**
+     * Checks to see if a variable exists
+     *
+     * @param string $value    The value to throw an error with if doesn't exist
+     * @param string $variable The variable name to get
+     * @param array  $lines    The lines already parsed
+     *
+     * @throws \M1\Env\Exception\ParseException If the variable can not be found
+     */
+    private function checkVariableExists($value, $variable, $lines)
+    {
+        if (!isset($lines[$variable])) {
+            throw new ParseException(
+                sprintf('Variable has not been defined: %s', $variable),
+                $this->origin_exception,
+                $this->file,
+                $value,
+                $this->line_num
+            );
+        }
+    }
+
+    /**
+     * Checks to see if a variable exists
+     *
+     * @param string $value         The value to throw an error with if doesn't exist
+     * @param array  $matches       The matches of the variables
+     * @param bool   $quoted_string Is the value in a quoted string
+     *
+     * @return string The parsed value
+     */
+    private function doReplacements($value, $matches, $quoted_string)
+    {
+        $replacements = array();
+
+        for ($i = 0; $i <= (count($matches[0]) - 1); $i++) {
+            $replacement = $this->fetchVariable($value, $matches[1][$i], $matches, $quoted_string);
+            $replacements[$matches[0][$i]] = $replacement;
+        }
+
+        if (!empty($replacements)) {
+            $value = strtr($value, $replacements);
+        }
+
+        return $value;
+    }
+
+    /**
      * Parses a .env string
      *
      * @param string $value    The value to parse
-     *
-     * @throws \M1\Env\Exception\ParseException If the string has a missing end quote
      *
      * @return string The parsed string
      */
     private function parseString($value)
     {
+        $regex = self::REGEX_QUOTE_DOUBLE_STRING;
+        $symbol = '"';
+
         if ($this->startsWith('\'', $value)) {
             $regex =  self::REGEX_QUOTE_SINGLE_STRING;
             $symbol = "'";
-        } else {
-            $regex = self::REGEX_QUOTE_DOUBLE_STRING;
-            $symbol = '"';
         }
 
+        $matches = $this->fetchStringMatches($value, $regex, $symbol);
+
+        $value = trim($matches[0], $symbol);
+        $value = strtr($value, self::$character_map);
+
+        return $this->parseVariables($value, true);
+    }
+
+    /**
+     * Gets the regex matches in the string
+     *
+     * @param string $regex    The regex to use
+     * @param string $value    The value to parse
+     * @param string $symbol   The symbol we're parsing for
+     *
+     * @throws \M1\Env\Exception\ParseException If the string has a missing end quote
+     *
+     * @return array The matches based on the regex and the value
+     */
+    private function fetchStringMatches($value, $regex, $symbol)
+    {
         if (!preg_match('/'.$regex.'/', $value, $matches)) {
             throw new ParseException(
                 sprintf('Missing end %s quote', $symbol),
@@ -258,12 +305,8 @@ class ValueParser extends AbstractParser
             );
         }
 
-        $value = trim($matches[0], $symbol);
-        $value = strtr($value, self::$character_map);
-
-        return $this->parseVariables($value, true);
+        return $matches;
     }
-
     /**
      * Parses a .env null value
      *
@@ -301,19 +344,9 @@ class ValueParser extends AbstractParser
      */
     private function parseBool($value)
     {
-        switch (strtolower($value)) {
-            case 'true':
-            case 'yes':
-                $value = true;
-                break;
-            case 'false':
-            case 'no':
-            default:
-                $value = false;
-                break;
-        }
+        $value = strtolower($value);
 
-        return $value;
+        return $value === "true" || $value === "yes";
     }
 
     /**

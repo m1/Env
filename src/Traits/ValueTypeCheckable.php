@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  *
  * @package     m1/env
- * @version     0.2.0
+ * @version     1.0.0
  * @author      Miles Croxford <hello@milescroxford.com>
  * @copyright   Copyright (c) Miles Croxford <hello@milescroxford.com>
  * @license     http://github.com/m1/env/blob/master/LICENSE.md
@@ -48,6 +48,20 @@ trait ValueTypeCheckable
     private function isBool($value)
     {
         return in_array(strtolower($value), self::$bool_variants);
+    }
+
+    /**
+     * Returns if the bool is in a string
+     *
+     * @param string $value         The value to test
+     * @param bool   $quoted_string Is the context a quoted string
+     * @param int    $word_count    The amount of words in the sentence
+     *
+     * @return bool Is a value a bool in a string
+     */
+    private function isBoolInString($value, $quoted_string, $word_count)
+    {
+        return (is_bool($value)) && ($quoted_string || $word_count >= 2);
     }
 
     /**

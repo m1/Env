@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  *
  * @package     m1/env
- * @version     0.2.0
+ * @version     1.0.0
  * @author      Miles Croxford <hello@milescroxford.com>
  * @copyright   Copyright (c) Miles Croxford <hello@milescroxford.com>
  * @license     http://github.com/m1/env/blob/master/LICENSE.md
@@ -38,8 +38,27 @@ class ParseException extends \ErrorException
      */
     public function __construct($message, $origin_exception = false, $file = null, $line = null, $line_num = null)
     {
-        $message = $message;
+        $message = $this->createMessage($message, $file, $line, $line_num);
 
+        if ($origin_exception) {
+            parent::__construct($message, 0, 1, $file, $line_num);
+        }
+
+        parent::__construct($message);
+    }
+
+    /**
+     * Constructs a ParseException message
+     *
+     * @param string $message          The value to parse
+     * @param string $file             The .env file
+     * @param string $line             The line of the value
+     * @param int    $line_num         The line num of the value
+     *
+     * @return string The exception message
+     */
+    private function createMessage($message, $file, $line, $line_num)
+    {
         if (!is_null($file)) {
             $message .= sprintf(" in %s", $file);
         }
@@ -52,10 +71,6 @@ class ParseException extends \ErrorException
             $message .= sprintf(" at line %d", $line_num);
         }
 
-        if ($origin_exception) {
-            parent::__construct($message, 0, 1, $file, $line_num);
-        }
-
-        parent::__construct($message);
+        return $message;
     }
 }

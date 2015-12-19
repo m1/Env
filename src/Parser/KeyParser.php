@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  *
  * @package     m1/env
- * @version     0.2.0
+ * @version     1.0.0
  * @author      Miles Croxford <hello@milescroxford.com>
  * @copyright   Copyright (c) Miles Croxford <hello@milescroxford.com>
  * @license     http://github.com/m1/env/blob/master/LICENSE.md
