@@ -2,6 +2,11 @@
 
 All Notable changes to `Env` will be documented in this file
 
+## 1.0.1 - 2015-12-13
+### Fixed
+- Fixed composer.json
+
+
 ## 1.0.0 - 2015-12-13
 ### Altered
 - Bump to version 1
