@@ -23,8 +23,20 @@ namespace M1\Env\Traits;
  *
  * @since 0.2.0
  */
-trait ValueTypeCheckable
+trait ValueCheckTrait
 {
+    /**
+     * Returns if value starts with a value
+     *
+     * @param string $string The value to search for
+     * @param string $line   The line to test
+     *
+     * @return bool Returns if the line starts with value
+     */
+    protected function startsWith($string, $line)
+    {
+        return $string === "" || strrpos($line, $string, -strlen($line)) !== false;
+    }
 
     /**
      * Returns if value is a string

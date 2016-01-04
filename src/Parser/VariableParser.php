@@ -1,0 +1,320 @@
+<?php
+
+/**
+ * This file is part of the m1\env library
+ *
+ * (c) m1 <hello@milescroxford.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @package     m1/env
+ * @version     1.1.0
+ * @author      Miles Croxford <hello@milescroxford.com>
+ * @copyright   Copyright (c) Miles Croxford <hello@milescroxford.com>
+ * @license     http://github.com/m1/env/blob/master/LICENSE.md
+ * @link        http://github.com/m1/env/blob/master/README.md Documentation
+ */
+
+namespace M1\Env\Parser;
+
+use M1\Env\Exception\ParseException;
+use M1\Env\Traits\ValueCheckTrait;
+
+/**
+ * The value parser for Env
+ *
+ * @since 1.1.0
+ */
+class VariableParser extends AbstractParser
+{
+    /**
+     * The trait for checking types
+     */
+    use ValueCheckTrait;
+
+    /**
+     * The regex to get variables '$(VARIABLE)' in .env
+     * Unescaped: ${(.*?)}
+     *
+     * @var string REGEX_ENV_VARIABLE
+     */
+    const REGEX_ENV_VARIABLE = '\\${(.*?)}';
+
+    /**
+     * The symbol for the assign default value parameter expansion
+     *
+     * @var string SYMBOL_ASSIGN_DEFAULT_VALUE
+     */
+    CONST SYMBOL_ASSIGN_DEFAULT_VALUE = '=';
+
+    /**
+     * The symbol for the default value parameter expansion
+     *
+     * @var string SYMBOL_DEFAULT_VALUE
+     */
+    CONST SYMBOL_DEFAULT_VALUE = '-';
+
+    /**
+     * Parses a .env variable
+     *
+     * @param string $value         The value to parse
+     * @param bool   $quoted_string Is the value in a quoted string
+     *
+     * @return string The parsed value
+     */
+    public function parse($value, $quoted_string = false)
+    {
+        $matches = $this->fetchVariableMatches($value);
+
+        if (is_array($matches)) {
+            if ($this->isVariableClone($value, $matches, $quoted_string)) {
+                return $this->fetchVariable($value, $matches[1][0], $matches, $quoted_string);
+            }
+
+            $value = $this->doReplacements($value, $matches, $quoted_string);
+        }
+
+        return $value;
+    }
+
+    /**
+     * Get variable matches inside a string
+     *
+     * @param string $value The value to parse
+     *
+     * @return array The variable matches
+     */
+    private function fetchVariableMatches($value)
+    {
+        preg_match_all('/' . self::REGEX_ENV_VARIABLE . '/', $value, $matches);
+
+        if (!is_array($matches) || !isset($matches[0]) || empty($matches[0])) {
+            return false;
+        }
+
+        return $matches;
+    }
+
+    /**
+     * Parses a .env variable
+     *
+     * @param string $value         The value to parse
+     * @param string $variable_name The variable name to get
+     * @param array  $matches       The matches of the variables
+     * @param bool   $quoted_string Is the value in a quoted string
+     *
+     * @return string The parsed value
+     */
+    private function fetchVariable($value, $variable_name, $matches, $quoted_string)
+    {
+        if ($this->hasParameterExpansion($variable_name)) {
+            $replacement = $this->fetchParameterExpansion($variable_name);
+        } else {
+            $this->checkVariableExists($value, $variable_name);
+            $replacement = $this->parser->lines[$variable_name];
+        }
+
+        if ($this->isBoolInString($replacement, $quoted_string, count($matches[0]))) {
+            $replacement = ($replacement) ? 'true' : 'false';
+        }
+
+        return $replacement;
+    }
+
+    /**
+     * Checks to see if the variable has a parameter expansion
+     *
+     * @param string $variable The variable to check
+     *
+     * @return bool Does the variable have a parameter expansion
+     */
+    private function hasParameterExpansion($variable)
+    {
+        if ((strpos($variable, self::SYMBOL_DEFAULT_VALUE) !== false) ||
+            (strpos($variable, self::SYMBOL_ASSIGN_DEFAULT_VALUE) !== false)
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Fetches and sets the parameter expansion
+     *
+     * @param string $variable_name The parameter expansion inside this to fetch
+     *
+     * @return string The parsed value
+     */
+    private function fetchParameterExpansion($variable_name)
+    {
+        $parameter_type = $this->fetchParameterExpansionType($variable_name);
+
+        list($parameter_symbol, $empty_flag) = $this->fetchParameterExpansionSymbol($variable_name, $parameter_type);
+        list($variable, $default) = $this->splitVariableDefault($variable_name, $parameter_symbol);
+
+        return $this->parseVariableDefault($variable, $default, $empty_flag, $parameter_type);
+    }
+
+    /**
+     * Fetches the parameter expansion type
+     *
+     * @param string $variable_name The parameter expansion type to get from this
+     *
+     * @return string The parameter expansion type
+     */
+    private function fetchParameterExpansionType($variable_name)
+    {
+        if (strpos($variable_name, self::SYMBOL_ASSIGN_DEFAULT_VALUE) !== false) {
+            return 'assign_default_value';
+        }
+
+        return 'default_value'; // self::DEFAULT_VALUE_SYMBOL
+    }
+
+    /**
+     * Fetches the parameter type symbol
+     *
+     * @param string $variable_name The variable
+     * @param string $type          The type of parameter expansion
+     *
+     * @return array The symbol and if there is a empty check
+     */
+    private function fetchParameterExpansionSymbol($variable_name, $type)
+    {
+        $symbol = (new \ReflectionClass($this))->getConstant('SYMBOL_'.strtoupper($type));
+        $pos = strpos($variable_name, $symbol);
+
+        $check_empty = substr($variable_name, ($pos - 1), 1) === ":";
+
+        if ($check_empty) {
+            $symbol = sprintf(":%s", $symbol);
+        }
+
+        return array($symbol, $check_empty);
+    }
+
+    /**
+     * Splits the parameter expansion into variable and default
+     *
+     * @param string $variable_name    The variable name to split
+     * @param string $parameter_symbol The parameter expansion symbol
+     *
+     * @throws \M1\Env\Exception\ParseException If the parameter expansion if not valid syntax
+     *
+     * @return array The split variable and default value
+     */
+    private function splitVariableDefault($variable_name, $parameter_symbol)
+    {
+        $variable_default = explode($parameter_symbol, $variable_name, 2);
+        if (count($variable_default) !== 2 || empty($variable_default[1])) {
+            throw new ParseException(
+                'You must have valid parameter expansion syntax, eg. ${parameter:=word}',
+                $this->parser->origin_exception,
+                $this->parser->file,
+                $variable_name,
+                $this->parser->line_num
+            );
+        }
+
+        return array(trim($variable_default[0]), trim($variable_default[1]));
+    }
+
+    /**
+     * Parses and sets the variable and default if needed
+     *
+     * @param string $variable_name  The variable name to parse and set
+     * @param string $default        The default value
+     * @param bool   $check_empty    Is there a check empty flag `:`
+     * @param string $parameter_type The type of parameter expansion
+     *
+     * @return string The parsed value
+     */
+    private function parseVariableDefault($variable_name, $default, $check_empty, $parameter_type)
+    {
+        $variable_exists = $this->checkVariableExists($variable_name, $variable_name, true);
+        $variable_empty = $this->checkVariableEmpty($variable_name, $check_empty);
+
+        if ($variable_exists && !$variable_empty) {
+            $value = $this->parser->lines[$variable_name];
+        } else {
+            $default = $this->parser->value_parser->parse($default);
+            $value = $default;
+
+            if ($parameter_type === "assign_default_value" && $variable_empty) {
+                $this->parser->lines[$variable_name] = $default;
+            }
+        }
+
+        return $value;
+    }
+
+    /**
+     * Checks to see if a variable exists
+     *
+     * @param string $value          The value to throw an error with if doesn't exist
+     * @param string $variable       The variable name to get
+     * @param bool   $variable_check Are you checking to only see if a variable exists and not to throw an exception
+     *
+     * @throws \M1\Env\Exception\ParseException If the variable can not be found and `$variable_check` is false
+     *
+     * @return bool Does the variable exist
+     */
+    private function checkVariableExists($value, $variable, $variable_check = false)
+    {
+        if (!array_key_exists($variable, $this->parser->lines)) {
+            if ($variable_check) {
+                return false;
+            }
+
+            throw new ParseException(
+                sprintf('Variable has not been defined: %s', $variable),
+                $this->parser->origin_exception,
+                $this->parser->file,
+                $value,
+                $this->parser->line_num
+            );
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks to see if a variable exists
+     *
+     * @param string $variable       The variable name to get
+     * @param bool   $check_empty    Is there a check empty flag `:`
+     *
+     * @return bool Is the variable empty if the check empty flag is set
+     */
+    private function checkVariableEmpty($variable, $check_empty)
+    {
+        return $check_empty && empty($this->parser->lines[$variable]);
+    }
+
+    /**
+     * Do the variable replacements
+     *
+     * @param string $value         The value to throw an error with if doesn't exist
+     * @param array  $matches       The matches of the variables
+     * @param bool   $quoted_string Is the value in a quoted string
+     *
+     * @return string The parsed value
+     */
+    public function doReplacements($value, $matches, $quoted_string)
+    {
+        $replacements = array();
+
+        for ($i = 0; $i <= (count($matches[0]) - 1); $i++) {
+            $replacement = $this->fetchVariable($value, $matches[1][$i], $matches, $quoted_string);
+            $replacements[$matches[0][$i]] = $replacement;
+        }
+
+        if (!empty($replacements)) {
+            $value = strtr($value, $replacements);
+        }
+
+        return $value;
+    }
+}

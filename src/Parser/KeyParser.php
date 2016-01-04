@@ -19,6 +19,7 @@
 namespace M1\Env\Parser;
 
 use M1\Env\Exception\ParseException;
+use M1\Env\Traits\ValueCheckTrait;
 
 /**
  * The key parser for Env
@@ -27,6 +28,10 @@ use M1\Env\Exception\ParseException;
  */
 class KeyParser extends AbstractParser
 {
+    /**
+     * The trait for checking types
+     */
+    use ValueCheckTrait;
 
     /**
      * Parses a .env key
@@ -38,7 +43,7 @@ class KeyParser extends AbstractParser
      *
      * @return string|false The parsed key, or false if the key is a comment
      */
-    public function parse($key, $line_num)
+    public function parse($key)
     {
         $key = trim($key);
 
@@ -49,10 +54,10 @@ class KeyParser extends AbstractParser
         if (!ctype_alnum(str_replace('_', '', $key))) {
             throw new ParseException(
                 sprintf('Key can only contain alphanumeric and underscores: %s', $key),
-                $this->origin_exception,
-                $this->file,
+                $this->parser->origin_exception,
+                $this->parser->file,
                 $key,
-                $line_num
+                $this->parser->line_num
             );
         }
 

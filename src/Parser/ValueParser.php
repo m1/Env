@@ -19,6 +19,7 @@
 namespace M1\Env\Parser;
 
 use M1\Env\Exception\ParseException;
+use M1\Env\Traits\ValueCheckTrait;
 use M1\Env\Traits\ValueTypeCheckable;
 
 /**
@@ -31,15 +32,7 @@ class ValueParser extends AbstractParser
     /**
      * The trait for checking types
      */
-    use ValueTypeCheckable;
-
-    /**
-     * The regex to get variables '$(VARIABLE)' in .env
-     * Unescaped: ${(.*?)}
-     *
-     * @var string REGEX_ENV_VARIABLE
-     */
-    const REGEX_ENV_VARIABLE = '\\${(.*?)}';
+    use ValueCheckTrait;
 
     /**
      * The regex to get the content between double quote (") strings, ignoring escaped quotes.
@@ -78,34 +71,27 @@ class ValueParser extends AbstractParser
         '\\t' => "\t"
     );
 
-    /**
-     * The line num of the current value
-     *
-     * @var int $line_num
-     */
-    private $line_num;
+    private $variable_parser;
 
     /**
-     * The current parsed values/lines
-     *
-     * @var array $lines
+     * {@inheritdoc}
      */
-    private $lines;
+    public function __construct($parser)
+    {
+        parent::__construct($parser);
+
+        $this->variable_parser = new VariableParser($parser);
+    }
 
     /**
      * Parses a .env value
      *
      * @param string $value    The value to parse
-     * @param array  $lines    The array of already parsed lines
-     * @param int    $line_num The line num of the value
      *
      * @return string|null The parsed key, or null if the key is a comment
      */
-    public function parse($value, $lines, $line_num)
+    public function parse($value)
     {
-        $this->lines = $lines;
-        $this->line_num = $line_num;
-
         $value = trim($value);
 
         if ($this->startsWith('#', $value)) {
@@ -145,119 +131,6 @@ class ValueParser extends AbstractParser
     }
 
     /**
-     * Parses a .env variable
-     *
-     * @param string $value         The value to parse
-     * @param bool   $quoted_string Is the value in a quoted string
-     *
-     * @return string The parsed value
-     */
-    private function parseVariables($value, $quoted_string = false)
-    {
-        $matches = $this->fetchVariableMatches($value);
-
-        if (is_array($matches)) {
-            if ($this->isVariableClone($value, $matches, $quoted_string)) {
-                return $this->fetchVariable($value, $matches[1][0], $matches, $quoted_string);
-            }
-
-            $value = $this->doReplacements($value, $matches, $quoted_string);
-        }
-
-        return $value;
-    }
-
-    /**
-     * Get variable matches inside a string
-     *
-     * @param string $value The value to parse
-     *
-     * @return array The variable matches
-     */
-    private function fetchVariableMatches($value)
-    {
-        preg_match_all('/'.self::REGEX_ENV_VARIABLE.'/', $value, $matches);
-
-        if (!is_array($matches) || !isset($matches[0]) || empty($matches[0])) {
-            return false;
-        }
-
-        return $matches;
-    }
-
-    /**
-     * Parses a .env variable
-     *
-     * @param string $value         The value to parse
-     * @param string $variable_name The variable name to get
-     * @param array  $matches       The matches of the variables
-     * @param bool   $quoted_string Is the value in a quoted string
-     *
-     * @throws \M1\Env\Exception\ParseException If the variable can not be found
-     *
-     * @return string The parsed value
-     */
-    private function fetchVariable($value, $variable_name, $matches, $quoted_string)
-    {
-        $this->checkVariableExists($value, $variable_name, $this->lines);
-
-        $replacement = $this->lines[$variable_name];
-
-        if ($this->isBoolInString($replacement, $quoted_string, count($matches[0]))) {
-            $replacement = ($replacement) ? 'true' : 'false';
-        }
-
-        return $replacement;
-    }
-
-    /**
-     * Checks to see if a variable exists
-     *
-     * @param string $value    The value to throw an error with if doesn't exist
-     * @param string $variable The variable name to get
-     * @param array  $lines    The lines already parsed
-     *
-     * @throws \M1\Env\Exception\ParseException If the variable can not be found
-     */
-    private function checkVariableExists($value, $variable, $lines)
-    {
-        if (!isset($lines[$variable])) {
-            throw new ParseException(
-                sprintf('Variable has not been defined: %s', $variable),
-                $this->origin_exception,
-                $this->file,
-                $value,
-                $this->line_num
-            );
-        }
-    }
-
-    /**
-     * Checks to see if a variable exists
-     *
-     * @param string $value         The value to throw an error with if doesn't exist
-     * @param array  $matches       The matches of the variables
-     * @param bool   $quoted_string Is the value in a quoted string
-     *
-     * @return string The parsed value
-     */
-    private function doReplacements($value, $matches, $quoted_string)
-    {
-        $replacements = array();
-
-        for ($i = 0; $i <= (count($matches[0]) - 1); $i++) {
-            $replacement = $this->fetchVariable($value, $matches[1][$i], $matches, $quoted_string);
-            $replacements[$matches[0][$i]] = $replacement;
-        }
-
-        if (!empty($replacements)) {
-            $value = strtr($value, $replacements);
-        }
-
-        return $value;
-    }
-
-    /**
      * Parses a .env string
      *
      * @param string $value    The value to parse
@@ -279,7 +152,7 @@ class ValueParser extends AbstractParser
         $value = trim($matches[0], $symbol);
         $value = strtr($value, self::$character_map);
 
-        return $this->parseVariables($value, true);
+        return $this->variable_parser->parse($value, true);
     }
 
     /**
@@ -298,10 +171,10 @@ class ValueParser extends AbstractParser
         if (!preg_match('/'.$regex.'/', $value, $matches)) {
             throw new ParseException(
                 sprintf('Missing end %s quote', $symbol),
-                $this->origin_exception,
-                $this->file,
+                $this->parser->origin_exception,
+                $this->parser->file,
                 $value,
-                $this->line_num
+                $this->parser->line_num
             );
         }
 
@@ -332,7 +205,7 @@ class ValueParser extends AbstractParser
             return null;
         }
 
-        return $this->parseVariables($value);
+        return $this->variable_parser->parse($value);
     }
 
     /**

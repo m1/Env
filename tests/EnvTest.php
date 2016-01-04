@@ -9,20 +9,20 @@ class EnvTest extends \PHPUnit_Framework_TestCase
 {
     public function testSimpleEnv()
     {
-        $excepted = array(
+        $expected = array(
             'TK1' => 'value',
             'TK2' => 'value',
             'TK3' => 'value',
         );
 
         $env = Env::Parse(__DIR__.'/mocks/simple.env');
-        $this->assertSame($excepted, $env);
+        $this->assertSame($expected, $env);
     }
 
     public function testDoubleQuotedEnv()
     {
 
-        $excepted = array(
+        $expected = array(
             'TK1' => 'value',
             'TK2' => 'value " value',
             'TK3' => 'value "value" value',
@@ -35,12 +35,12 @@ class EnvTest extends \PHPUnit_Framework_TestCase
         );
 
         $env = Env::Parse(__DIR__.'/mocks/double_quoted.env');
-        $this->assertEquals($excepted, $env);
+        $this->assertEquals($expected, $env);
     }
 
     public function testSingleQuotedEnv()
     {
-        $excepted = array(
+        $expected = array(
             'TK1' => 'value',
             'TK2' => 'value \' value',
             'TK3' => 'value \'value\' value',
@@ -53,12 +53,12 @@ class EnvTest extends \PHPUnit_Framework_TestCase
         );
 
         $env = Env::Parse(__DIR__.'/mocks/single_quoted.env');
-        $this->assertSame($excepted, $env);
+        $this->assertSame($expected, $env);
     }
 
     public function testBoolEnv()
     {
-        $excepted = array(
+        $expected = array(
             'TK1' => true,
             'TK2' => false,
             'TK3' => true,
@@ -70,35 +70,35 @@ class EnvTest extends \PHPUnit_Framework_TestCase
         );
 
         $env = Env::Parse(__DIR__.'/mocks/bool.env');
-        $this->assertSame($excepted, $env);
+        $this->assertSame($expected, $env);
     }
 
     public function testNumbersEnv()
     {
-        $excepted = array(
+        $expected = array(
             'TK1' => 1,
             'TK2' => 1.1,
             'TK3' => "33 33",
         );
 
         $env = Env::Parse(__DIR__.'/mocks/numbers.env');
-        $this->assertSame($excepted, $env);
+        $this->assertSame($expected, $env);
     }
 
     public function testNullEnv()
     {
-        $excepted = array(
+        $expected = array(
             'TK1' => null,
             'TK2' => null,
         );
 
         $env = Env::Parse(__DIR__.'/mocks/null.env');
-        $this->assertSame($excepted, $env);
+        $this->assertSame($expected, $env);
     }
 
     public function testCommentsEnv()
     {
-        $excepted = array(
+        $expected = array(
             'TK1' => 'value',
             'TK2' => 'value',
             'TK3' => 'value',
@@ -106,21 +106,21 @@ class EnvTest extends \PHPUnit_Framework_TestCase
         );
 
         $env = Env::Parse(__DIR__.'/mocks/comments.env');
-        $this->assertSame($excepted, $env);
+        $this->assertSame($expected, $env);
     }
 
     public function testEmptyFileEnv()
     {
-        $excepted = array(
+        $expected = array(
         );
 
         $env = Env::Parse(__DIR__.'/mocks/empty_file.env');
-        $this->assertSame($excepted, $env);
+        $this->assertSame($expected, $env);
     }
 
     public function testAllWithVariablesEnv()
     {
-        $excepted = array(
+        $expected = array(
             'double_1' => "hey\nhey",
             'double_2' => "hello \"hello\" hello",
             'double_3' => "hello \"hello\" hello",
@@ -159,16 +159,122 @@ class EnvTest extends \PHPUnit_Framework_TestCase
         );
 
         $env = Env::Parse(__DIR__.'/mocks/variables.env');
-        $this->assertEquals($excepted, $env);
+        $this->assertEquals($expected, $env);
+    }
+
+    public function testVariableParameterExpansion()
+    {
+        $expected = array(
+            "TK1" => "TV1",
+            "TK2" => "TV1",
+            "TK3" => "TV3",
+            "TK4" => "TV4",
+            "TK5" => null,
+            "TK6" => null,
+            "TK7" => null,
+            "TK8" => null,
+            "TK_1" => "TV3",
+            'TK_3' => '',
+            'TK9' => '',
+            'TK_4' => null,
+            'TK10' => null,
+            'TK_5' => true,
+            'TK11' => true,
+        );
+
+        $env = Env::Parse(__DIR__.'/mocks/variable_parameter_expansion.env');
+        $this->assertEquals($expected, $env);
+    }
+
+    public function testFinalCase()
+    {
+        $expected = array(
+            "TEST1" => "value",
+            "TEST2" => "value",
+            "TEST3" => "value",
+            "TEST4" => "value",
+            "TEST5" => "value value",
+            "TEST6" => "value \n value",
+            "TEST7" => 'value "value" value',
+            "TEST8" => "value",
+            "TEST9" => "value ' value ' value",
+            "TEST10" => 1,
+            "TEST11" => 1.1,
+            "TEST12" => "33 33",
+            "TEST13" => "33",
+            "TEST14" => true,
+            "TEST15" => false,
+            "TEST16" => true,
+            "TEST17" => false,
+            "TEST18" => true,
+            "TEST19" => false,
+            "TEST20" => true,
+            "TEST21" => false,
+            "TEST22" => "true",
+            "TEST23" => "YES",
+            "TEST24" => 'NO',
+            "TEST25" => null,
+            "TEST26" => null,
+            "TEST27" => "hello",
+            "TEST28" => "hello",
+            "TEST29" => 1,
+            "TEST30" => 2,
+            "TEST31" => 1,
+            "TEST32" => "1",
+            "TEST33" => "1 2",
+            "TEST34" => "foo",
+            "TEST35" => "bar",
+            "TEST36" => "foo/bar",
+            "TEST37" => "foo",
+            "TEST38" => 'bar',
+            "TEST39" => "hello foo and bar",
+            "TEST40" => true,
+            "TEST41" => false,
+            "TEST42" => true,
+            "TEST43" => "true false",
+            "TEST44" => null,
+            "TEST45" => null,
+            "TEST46" => "",
+            'TEST47' => 'foo',
+            'TEST48' => 'foo',
+            'TEST50' => 'foo',
+            'TEST49' => 'foo',
+            'TEST51' => 'foo',
+            'TEST53' => null,
+            'TEST54' => null,
+            'TEST55' => null,
+            'TEST56' => null,
+            'TEST58' => '',
+            'TEST57' => '',
+            'TEST60' => null,
+            'TEST59' => null,
+            'TEST62' => true,
+            'TEST61' => true,
+        );
+
+        $env = Env::Parse(__DIR__.'/mocks/all_testcase.env');
+        $this->assertEquals($expected, $env);
     }
 
     public function testOtherEnv()
     {
-        $excepted = array(
+        $expected = array(
         );
 
         $env = Env::Parse(__DIR__.'/mocks/other.env');
-        $this->assertSame($excepted, $env);
+        $this->assertSame($expected, $env);
+    }
+
+    public function testNullVariable()
+    {
+        $expected = array(
+            'test_key_1' => null,
+            'test_key_2' => null,
+            'test_key_3' => ""
+        );
+
+        $env = Env::Parse(__DIR__.'/mocks/null_variable.env');
+        $this->assertSame($expected, $env);
     }
 
     public function testParseOriginException()
@@ -210,6 +316,14 @@ class EnvTest extends \PHPUnit_Framework_TestCase
     public function testUndefinedVariable()
     {
         $env = Env::Parse(__DIR__.'/mocks/fail_undefined_variable.env');
+    }
+
+    /**
+     * @expectedException \M1\Env\Exception\ParseException
+     */
+    public function testInvalidParameterExpansion()
+    {
+        $env = Env::Parse(__DIR__.'/mocks/fail_invalid_parameter_expansion.env');
     }
 
     /**

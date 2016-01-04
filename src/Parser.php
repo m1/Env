@@ -19,17 +19,29 @@
 namespace M1\Env;
 
 use M1\Env\Exception\ParseException;
-use M1\Env\Parser\AbstractParser;
 use M1\Env\Parser\ValueParser;
 use M1\Env\Parser\KeyParser;
+use M1\Env\Traits\ValueCheckTrait;
 
 /**
  * The .env parser
  *
  * @since 0.1.0
  */
-class Parser extends AbstractParser
+class Parser
 {
+    /**
+     * The trait for checking types
+     */
+    use ValueCheckTrait;
+
+    /**
+     * The .env to parse
+     *
+     * @var string $file
+     */
+    public $file;
+
     /**
      * The Env key parser
      *
@@ -38,11 +50,32 @@ class Parser extends AbstractParser
     private $key_parser;
 
     /**
+     * The line num of the current value
+     *
+     * @var int $line_num
+     */
+    public $line_num;
+
+    /**
+     * The current parsed values/lines
+     *
+     * @var array $lines
+     */
+    public $lines;
+
+    /**
+     * If to throw ParseException in the .env
+     *
+     * @var bool $origin_exception
+     */
+    public $origin_exception;
+
+    /**
      * The Env value parser
      *
      * @var \M1\Env\Parser\ValueParser $value_parser
      */
-    private $value_parser;
+    public $value_parser;
 
     /**
      * The parser constructor
@@ -52,10 +85,10 @@ class Parser extends AbstractParser
      */
     public function __construct($file, $origin_exception = false)
     {
-        parent::__construct($file, $origin_exception);
-
-        $this->key_parser = new KeyParser($file, $origin_exception);
-        $this->value_parser = new ValueParser($file, $origin_exception);
+        $this->file = $file;
+        $this->origin_exception = $origin_exception;
+        $this->key_parser = new KeyParser($this);
+        $this->value_parser = new ValueParser($this);
     }
 
     /**
@@ -85,57 +118,52 @@ class Parser extends AbstractParser
      */
     public function parseContent(array $raw_content)
     {
-        $lines = array();
-        $line_num = 0;
+        $this->lines = array();
+        $this->line_num = 0;
 
         foreach ($raw_content as $raw_line) {
-            $line_num++;
+            $this->line_num++;
 
             if ($this->startsWith('#', $raw_line) || !$raw_line) {
                 continue;
             }
 
-            $lines = $this->parseLine($raw_line, $line_num, $lines);
+            $this->parseLine($raw_line);
         }
 
-        return $lines;
+        return $this->lines;
     }
 
     /**
      * Parses a line of the .env
      *
      * @param string $raw_line The raw content of the line
-     * @param int    $line_num The line number of the line
-     * @param array  $lines    The parsed lines
      *
      * @return array The parsed lines
      */
-    private function parseLine($raw_line, $line_num, $lines)
+    private function parseLine($raw_line)
     {
-        list($key, $value) = $this->parseKeyValue($raw_line, $line_num);
+        list($key, $value) = $this->parseKeyValue($raw_line);
 
-        $key = $this->key_parser->parse($key, $line_num);
+        $key = $this->key_parser->parse($key);
 
         if (!is_string($key)) {
-            return $lines;
+            return;
         }
 
-        $lines[$key] = $this->value_parser->parse($value, $lines, $line_num);
-
-        return $lines;
+        $this->lines[$key] = $this->value_parser->parse($value);
     }
 
     /**
      * Gets the key = value items from the line
      *
      * @param string $raw_line The raw content of the line
-     * @param int    $line_num The line number of the line
      *
      * @throws \M1\Env\Exception\ParseException If the line does not have a key=value structure
      *
      * @return array The parsed lines
      */
-    private function parseKeyValue($raw_line, $line_num)
+    private function parseKeyValue($raw_line)
     {
         $key_value = explode("=", $raw_line, 2);
 
@@ -145,7 +173,7 @@ class Parser extends AbstractParser
                 $this->origin_exception,
                 $this->file,
                 $raw_line,
-                $line_num
+                $this->line_num
             );
         }
 

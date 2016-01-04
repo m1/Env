@@ -26,41 +26,19 @@ namespace M1\Env\Parser;
 abstract class AbstractParser
 {
     /**
-     * The .env to parse
+     * The parent parser
      *
-     * @var string $file
+     * @var \M1\Env\Parser $parser
      */
-    protected $file;
-
-    /**
-     * If to throw ParseException in the .env
-     *
-     * @var bool $origin_exception
-     */
-    protected $origin_exception;
+    protected $parser;
 
     /**
      * The abstract parser constructor for Env
      *
-     * @param string $file           The file to use with Env
-     * @param bool $origin_exception If to throw exceptions in the origin file
+     * @param \M1\Env\Parser $parser The parent parser
      */
-    public function __construct($file, $origin_exception)
+    public function __construct($parser)
     {
-        $this->file = $file;
-        $this->origin_exception = $origin_exception;
-    }
-
-    /**
-     * Returns if value starts with a value
-     *
-     * @param string $string The value to search for
-     * @param string $line   The line to test
-     *
-     * @return bool Returns if the line starts with value
-     */
-    protected function startsWith($string, $line)
-    {
-        return $string === "" || strrpos($line, $string, -strlen($line)) !== false;
+        $this->parser = $parser;
     }
 }
