@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  *
  * @package     m1/env
- * @version     1.0.0
+ * @version     1.1.0
  * @author      Miles Croxford <hello@milescroxford.com>
  * @copyright   Copyright (c) Miles Croxford <hello@milescroxford.com>
  * @license     http://github.com/m1/env/blob/master/LICENSE.md
@@ -36,8 +36,7 @@ class KeyParser extends AbstractParser
     /**
      * Parses a .env key
      *
-     * @param string $key      The key string
-     * @param int    $line_num The line num of the key
+     * @param string $key The key string
      *
      * @throws \M1\Env\Exception\ParseException If key contains a character that isn't alphanumeric or a _
      *

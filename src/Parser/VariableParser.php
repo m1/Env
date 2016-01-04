@@ -46,14 +46,14 @@ class VariableParser extends AbstractParser
      *
      * @var string SYMBOL_ASSIGN_DEFAULT_VALUE
      */
-    CONST SYMBOL_ASSIGN_DEFAULT_VALUE = '=';
+    const SYMBOL_ASSIGN_DEFAULT_VALUE = '=';
 
     /**
      * The symbol for the default value parameter expansion
      *
      * @var string SYMBOL_DEFAULT_VALUE
      */
-    CONST SYMBOL_DEFAULT_VALUE = '-';
+    const SYMBOL_DEFAULT_VALUE = '-';
 
     /**
      * Parses a .env variable
@@ -236,18 +236,39 @@ class VariableParser extends AbstractParser
         $variable_exists = $this->checkVariableExists($variable_name, $variable_name, true);
         $variable_empty = $this->checkVariableEmpty($variable_name, $check_empty);
 
-        if ($variable_exists && !$variable_empty) {
-            $value = $this->parser->lines[$variable_name];
-        } else {
-            $default = $this->parser->value_parser->parse($default);
-            $value = $default;
+        return $this->parseVariableParameter(
+            $variable_name,
+            $default,
+            $variable_exists,
+            $variable_empty,
+            $parameter_type
+        );
+    }
 
-            if ($parameter_type === "assign_default_value" && $variable_empty) {
-                $this->parser->lines[$variable_name] = $default;
-            }
+    /**
+     * Parses and sets the variable and default if needed
+     *
+     * @param string $variable The variable to parse
+     * @param string $default  The default value
+     * @param bool   $exists   Does the variable exist
+     * @param bool   $empty    Is there the variable empty if exists and the empty flag is set
+     * @param string $type     The type of parameter expansion
+     *
+     * @return string The parsed value
+     */
+    private function parseVariableParameter($variable, $default, $exists, $empty, $type)
+    {
+        if ($exists && !$empty) {
+            return $this->parser->lines[$variable];
         }
 
-        return $value;
+        $default = $this->parser->value_parser->parse($default);
+
+        if ($type === "assign_default_value" && $empty) {
+            $this->parser->lines[$variable] = $default;
+        }
+
+        return $default;
     }
 
     /**

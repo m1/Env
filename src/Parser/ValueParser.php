@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  *
  * @package     m1/env
- * @version     1.0.0
+ * @version     1.1.0
  * @author      Miles Croxford <hello@milescroxford.com>
  * @copyright   Copyright (c) Miles Croxford <hello@milescroxford.com>
  * @license     http://github.com/m1/env/blob/master/LICENSE.md
@@ -20,7 +20,6 @@ namespace M1\Env\Parser;
 
 use M1\Env\Exception\ParseException;
 use M1\Env\Traits\ValueCheckTrait;
-use M1\Env\Traits\ValueTypeCheckable;
 
 /**
  * The value parser for Env
@@ -71,10 +70,17 @@ class ValueParser extends AbstractParser
         '\\t' => "\t"
     );
 
+    /**
+     * The parser for variables
+     *
+     * @var \M1\Env\Parser\VariableParser $variable_parser
+     */
     private $variable_parser;
 
     /**
      * {@inheritdoc}
+     *
+     * @param \M1\Env\Parser $parser The parent parser
      */
     public function __construct($parser)
     {
@@ -164,7 +170,7 @@ class ValueParser extends AbstractParser
      *
      * @throws \M1\Env\Exception\ParseException If the string has a missing end quote
      *
-     * @return array The matches based on the regex and the value
+     * @return string[] The matches based on the regex and the value
      */
     private function fetchStringMatches($value, $regex, $symbol)
     {
