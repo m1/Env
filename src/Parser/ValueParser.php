@@ -19,7 +19,6 @@
 namespace M1\Env\Parser;
 
 use M1\Env\Exception\ParseException;
-use M1\Env\Traits\ValueCheckTrait;
 
 /**
  * The value parser for Env
@@ -28,11 +27,6 @@ use M1\Env\Traits\ValueCheckTrait;
  */
 class ValueParser extends AbstractParser
 {
-    /**
-     * The trait for checking types
-     */
-    use ValueCheckTrait;
-
     /**
      * The regex to get the content between double quote (") strings, ignoring escaped quotes.
      * Unescaped: "(?:[^"\\]*(?:\\.)?)*"
@@ -103,7 +97,7 @@ class ValueParser extends AbstractParser
     {
         $value = trim($value);
 
-        if ($this->startsWith('#', $value)) {
+        if ($this->parser->string_helper->startsWith('#', $value)) {
             return null;
         }
 
@@ -129,7 +123,7 @@ class ValueParser extends AbstractParser
             $is_function = sprintf('is%s', ucfirst($type));
             $parse_function = sprintf('parse%s', ucfirst($type));
             
-            if ($this->$is_function($parsed_value)) {
+            if ($this->parser->string_helper->$is_function($parsed_value)) {
                 return $this->$parse_function($parsed_value);
             }
         }
@@ -149,7 +143,7 @@ class ValueParser extends AbstractParser
         $regex = self::REGEX_QUOTE_DOUBLE_STRING;
         $symbol = '"';
 
-        if ($this->startsWith('\'', $value)) {
+        if ($this->parser->string_helper->startsWith('\'', $value)) {
             $regex =  self::REGEX_QUOTE_SINGLE_STRING;
             $symbol = "'";
         }

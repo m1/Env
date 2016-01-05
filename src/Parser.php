@@ -19,9 +19,9 @@
 namespace M1\Env;
 
 use M1\Env\Exception\ParseException;
+use M1\Env\Helper\StringHelper;
 use M1\Env\Parser\ValueParser;
 use M1\Env\Parser\KeyParser;
-use M1\Env\Traits\ValueCheckTrait;
 
 /**
  * The .env parser
@@ -30,11 +30,6 @@ use M1\Env\Traits\ValueCheckTrait;
  */
 class Parser
 {
-    /**
-     * The trait for checking types
-     */
-    use ValueCheckTrait;
-
     /**
      * The .env to parse
      *
@@ -71,6 +66,14 @@ class Parser
     public $origin_exception;
 
     /**
+     * The String helper class
+     *
+     * @var \M1\Env\Helper\StringHelper $string_helper
+     */
+    public $string_helper;
+
+
+    /**
      * The Env value parser
      *
      * @var \M1\Env\Parser\ValueParser $value_parser
@@ -89,6 +92,7 @@ class Parser
         $this->origin_exception = $origin_exception;
         $this->key_parser = new KeyParser($this);
         $this->value_parser = new ValueParser($this);
+        $this->string_helper = new StringHelper();
     }
 
     /**
@@ -124,7 +128,7 @@ class Parser
         foreach ($raw_content as $raw_line) {
             $this->line_num++;
 
-            if ($this->startsWith('#', $raw_line) || !$raw_line) {
+            if ($this->string_helper->startsWith('#', $raw_line) || !$raw_line) {
                 continue;
             }
 

@@ -16,14 +16,14 @@
  * @link        http://github.com/m1/env/blob/master/README.md Documentation
  */
 
-namespace M1\Env\Traits;
+namespace M1\Env\Helper;
 
 /**
  * The trait for checking types
  *
- * @since 0.2.0
+ * @since 1.1.0
  */
-trait ValueCheckTrait
+class StringHelper
 {
     /**
      * The bool variants available in .env
@@ -42,7 +42,7 @@ trait ValueCheckTrait
      *
      * @return bool Returns if the line starts with value
      */
-    protected function startsWith($string, $line)
+    public function startsWith($string, $line)
     {
         return $string === "" || strrpos($line, $string, -strlen($line)) !== false;
     }
@@ -54,7 +54,7 @@ trait ValueCheckTrait
      *
      * @return bool Is a value a string
      */
-    private function isString($value)
+    public function isString($value)
     {
         return $this->startsWith('\'', $value) || $this->startsWith('"', $value);
     }
@@ -66,7 +66,7 @@ trait ValueCheckTrait
      *
      * @return bool Is a value a bool
      */
-    private function isBool($value)
+    public function isBool($value)
     {
         return in_array(strtolower($value), self::$bool_variants);
     }
@@ -80,7 +80,7 @@ trait ValueCheckTrait
      *
      * @return bool Is a value a bool in a string
      */
-    private function isBoolInString($value, $quoted_string, $word_count)
+    public function isBoolInString($value, $quoted_string, $word_count)
     {
         return (is_bool($value)) && ($quoted_string || $word_count >= 2);
     }
@@ -92,7 +92,7 @@ trait ValueCheckTrait
      *
      * @return bool Is a value a number
      */
-    private function isNumber($value)
+    public function isNumber($value)
     {
         return is_numeric($value);
     }
@@ -104,7 +104,7 @@ trait ValueCheckTrait
      *
      * @return bool Is a value null
      */
-    private function isNull($value)
+    public function isNull($value)
     {
         return $value === 'null';
     }
@@ -118,8 +118,8 @@ trait ValueCheckTrait
      *
      * @return bool Is a value null
      */
-    private function isVariableClone($value, $matches, $quoted_string)
+    public function isVariableClone($value, $matches, $quoted_string)
     {
-        return count($matches[0] === 1) && $value == $matches[0][0] && !$quoted_string;
+        return (count($matches[0]) === 1) && $value == $matches[0][0] && !$quoted_string;
     }
 }

@@ -29,11 +29,6 @@ use M1\Env\Traits\ValueCheckTrait;
 class KeyParser extends AbstractParser
 {
     /**
-     * The trait for checking types
-     */
-    use ValueCheckTrait;
-
-    /**
      * Parses a .env key
      *
      * @param string $key The key string
@@ -46,7 +41,7 @@ class KeyParser extends AbstractParser
     {
         $key = trim($key);
 
-        if ($this->startsWith('#', $key)) {
+        if ($this->parser->string_helper->startsWith('#', $key)) {
             return false;
         }
 

@@ -19,7 +19,6 @@
 namespace M1\Env\Parser;
 
 use M1\Env\Exception\ParseException;
-use M1\Env\Traits\ValueCheckTrait;
 
 /**
  * The value parser for Env
@@ -28,11 +27,6 @@ use M1\Env\Traits\ValueCheckTrait;
  */
 class VariableParser extends AbstractParser
 {
-    /**
-     * The trait for checking types
-     */
-    use ValueCheckTrait;
-
     /**
      * The regex to get variables '$(VARIABLE)' in .env
      * Unescaped: ${(.*?)}
@@ -68,7 +62,7 @@ class VariableParser extends AbstractParser
         $matches = $this->fetchVariableMatches($value);
 
         if (is_array($matches)) {
-            if ($this->isVariableClone($value, $matches, $quoted_string)) {
+            if ($this->parser->string_helper->isVariableClone($value, $matches, $quoted_string)) {
                 return $this->fetchVariable($value, $matches[1][0], $matches, $quoted_string);
             }
 
@@ -115,7 +109,7 @@ class VariableParser extends AbstractParser
             $replacement = $this->parser->lines[$variable_name];
         }
 
-        if ($this->isBoolInString($replacement, $quoted_string, count($matches[0]))) {
+        if ($this->parser->string_helper->isBoolInString($replacement, $quoted_string, count($matches[0]))) {
             $replacement = ($replacement) ? 'true' : 'false';
         }
 
