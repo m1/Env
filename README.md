@@ -6,10 +6,10 @@
 
 [![Build Status][ico-travis]][link-travis]
 [![Coverage Status][ico-scrutinizer]][link-scrutinizer]
-[![HHVM tested][ico-hhvm]][link-travis]
-[![Sensio medal][ico-sensio]][link-sensio]
-[![StyleCI](https://styleci.io/repos/47935133/shield)](https://styleci.io/repos/47935133)
 [![Quality Score][ico-code-quality]][link-code-quality]
+[![Sensio medal][ico-sensio]][link-sensio]
+[![HHVM tested][ico-hhvm]][link-travis]
+[![StyleCI](https://styleci.io/repos/47935133/shield)](https://styleci.io/repos/47935133)
 
 Env is a lightweight library bringing .env file parser compatibility to PHP. In short - it enables you to read .env files with PHP.
 
