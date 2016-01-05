@@ -461,10 +461,10 @@ The MIT License (MIT). Please see [License File](LICENSE.md) for more informatio
 [ico-license]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square
 [ico-travis]: https://img.shields.io/travis/m1/Env/master.svg?style=flat-square
 [ico-scrutinizer]: https://img.shields.io/scrutinizer/coverage/g/m1/Env.svg?style=flat-square
-[ico-hhvm]: https://img.shields.io/hhvm/m1/Env.svg
+[ico-hhvm]: https://img.shields.io/hhvm/m1/Env.svg?style=flat-square
 [ico-code-quality]: https://img.shields.io/scrutinizer/g/m1/Env.svg?style=flat-square
 [ico-downloads]: https://img.shields.io/packagist/dt/m1/Env.svg?style=flat-square
-[ico-sensio]: https://img.shields.io/sensiolabs/i/1fb8cbab-f611-45b5-8a45-0113e433eab7.svg
+[ico-sensio]: https://img.shields.io/sensiolabs/i/1fb8cbab-f611-45b5-8a45-0113e433eab7.svg?style=flat-square
 
 [link-packagist]: https://packagist.org/packages/m1/Env
 [link-travis]: https://travis-ci.org/m1/Env
@@ -473,4 +473,4 @@ The MIT License (MIT). Please see [License File](LICENSE.md) for more informatio
 [link-downloads]: https://packagist.org/packages/m1/Env
 [link-author]: https://github.com/m1
 [link-contributors]: ../../contributors
-[link-sensio]: https://insight.sensiolabs.com/projects/1fb8cbab-f611-45b5-8a45-0113e433eab7/
+[link-sensio]: https://insight.sensiolabs.com/projects/1fb8cbab-f611-45b5-8a45-0113e433eab7
