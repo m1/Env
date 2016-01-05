@@ -16,6 +16,10 @@ into other libraries. This library is not meant as a complete package for config
 is out of scope for this library. If you need something like that check out [Vars](http://github.com/m1/Vars) which incorporates
 this library so you can load Env and other file types if you want.
 
+## Requirements
+
+Env requires PHP version `5.3+`. It has no other dependencies.
+
 ## Install
 
 Via Composer

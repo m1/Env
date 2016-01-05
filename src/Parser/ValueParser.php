@@ -50,6 +50,18 @@ class ValueParser extends AbstractParser
     const REGEX_QUOTE_SINGLE_STRING = "'(?:[^'\\\\]*(?:\\\\.)?)*'";
 
     /**
+     * The value types that Env supports
+     *
+     * @var array $value_types
+     */
+    private static $value_types = array(
+        'string',
+        'bool',
+        'number',
+        'null',
+    );
+
+    /**
      * The map to convert escaped characters into real characters
      *
      * @var array $character_map
@@ -107,11 +119,7 @@ class ValueParser extends AbstractParser
      */
     private function parseValue($value)
     {
-        $types = array('string', 'bool', 'number', 'null');
-
-        $parsed_value = null;
-
-        foreach ($types as $type) {
+        foreach (self::$value_types as $type) {
             $parsed_value = $value;
 
             if ($type !== 'string') {
@@ -126,7 +134,7 @@ class ValueParser extends AbstractParser
             }
         }
 
-        return $this->parseUnquotedString($parsed_value);
+        return (isset($parsed_value)) ? $this->parseUnquotedString($parsed_value) : $value;
     }
 
     /**
@@ -179,7 +187,7 @@ class ValueParser extends AbstractParser
 
         return $matches;
     }
-    
+
     /**
      * Parses a .env null value
      *
