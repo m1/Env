@@ -3,13 +3,13 @@
 [![Author](http://img.shields.io/badge/author-@milescroxford-blue.svg?style=flat-square)](https://twitter.com/milescroxford)
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![Software License][ico-license]](LICENSE.md)
-
 [![Build Status][ico-travis]][link-travis]
 [![Coverage Status][ico-scrutinizer]][link-scrutinizer]
 [![Quality Score][ico-code-quality]][link-code-quality]
-[![Sensio medal][ico-sensio]][link-sensio]
 [![HHVM tested][ico-hhvm]][link-travis]
 [![StyleCI](https://styleci.io/repos/47935133/shield)](https://styleci.io/repos/47935133)
+
+[![Sensio badge][ico-sensio]][link-sensio]
 
 Env is a lightweight library bringing .env file parser compatibility to PHP. In short - it enables you to read .env files with PHP.
 
@@ -464,7 +464,7 @@ The MIT License (MIT). Please see [License File](LICENSE.md) for more informatio
 [ico-hhvm]: https://img.shields.io/hhvm/m1/Env.svg?style=flat-square
 [ico-code-quality]: https://img.shields.io/scrutinizer/g/m1/Env.svg?style=flat-square
 [ico-downloads]: https://img.shields.io/packagist/dt/m1/Env.svg?style=flat-square
-[ico-sensio]: https://img.shields.io/sensiolabs/i/1fb8cbab-f611-45b5-8a45-0113e433eab7.svg?style=flat-square
+[ico-sensio]: https://insight.sensiolabs.com/projects/1fb8cbab-f611-45b5-8a45-0113e433eab7/big.png
 
 [link-packagist]: https://packagist.org/packages/m1/Env
 [link-travis]: https://travis-ci.org/m1/Env
