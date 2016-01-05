@@ -471,6 +471,7 @@ todo
 ## Todo
 - Other library comparisons
 - [Other bash parameter expansions](http://wiki.bash-hackers.org/syntax/pe#display_error_if_null_or_unset)
+
 ## Change log
 
 Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recently.
