@@ -183,7 +183,8 @@ class VariableParser extends AbstractParser
      */
     private function fetchParameterExpansionSymbol($variable_name, $type)
     {
-        $symbol = (new \ReflectionClass($this))->getConstant('SYMBOL_'.strtoupper($type));
+        $class = new \ReflectionClass($this);
+        $symbol = $class->getConstant('SYMBOL_'.strtoupper($type));
         $pos = strpos($variable_name, $symbol);
 
         $check_empty = substr($variable_name, ($pos - 1), 1) === ":";

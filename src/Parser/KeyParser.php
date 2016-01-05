@@ -19,7 +19,6 @@
 namespace M1\Env\Parser;
 
 use M1\Env\Exception\ParseException;
-use M1\Env\Traits\ValueCheckTrait;
 
 /**
  * The key parser for Env
