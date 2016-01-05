@@ -4,10 +4,12 @@ All Notable changes to `Env` will be documented in this file
 
 ## 1.1.0 - 2016-01-05
 ### Added
-- Support for parameter expansions: (default value)[http://wiki.bash-hackers.org/syntax/pe#use_a_default_value] and (assign default value)[http://wiki.bash-hackers.org/syntax/pe#assign_a_default_value] 
+- Support for parameter expansions: [default value](http://wiki.bash-hackers.org/syntax/pe#use_a_default_value) and [assign default value](http://wiki.bash-hackers.org/syntax/pe#assign_a_default_value)
+- Support for php `5.3` and `hhvm`
 
 ### Altered
 - Updated README
+- Test cases
 
 ## 1.0.2 - 2016-01-03
 ### Altered

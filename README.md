@@ -214,7 +214,7 @@ TEST6 = ${TEST7:-bar}
 TEST8 = ${TEST9-bar}
 ```
 
-The default value parameter expansion syntax is `:-`, the explanation on the (bash-hackers wiki)[http://wiki.bash-hackers.org/syntax/pe#use_a_default_value] for this is:
+The default value parameter expansion syntax is `:-`, the explanation on the [bash-hackers wiki](http://wiki.bash-hackers.org/syntax/pe#use_a_default_value) for this is:
 > SYNTAX:
 >
 >`${PARAMETER:-WORD}`
@@ -238,7 +238,7 @@ TEST7 = ${TEST6:-bar} # TEST5 is set and empty so the value of TEST7 = bar
 
 ```
 
-The assign default value parameter expansion is `:=`, the explanation on the (bash-hackers wiki)[http://wiki.bash-hackers.org/syntax/pe#assign_a_default_value] for this is:
+The assign default value parameter expansion is `:=`, the explanation on the [bash-hackers wiki](http://wiki.bash-hackers.org/syntax/pe#assign_a_default_value) for this is:
 > SYNTAX:
 >
 >`${PARAMETER:=WORD}`
@@ -358,6 +358,13 @@ TEST56=${TEST55-foo}
 TEST57=${TEST58:=""}
 TEST59=${TEST60:=null} # TEST59 = null TEST60 = null -- both `null` types
 TEST61=${TEST62:=true} # TEST61 = true TEST62 = true -- both `bool` types
+
+# Comments
+TEST62 = hello # comment
+TEST63 = "hello # comment"
+TEST64 = "hello" #comment
+TEST66 = #comment
+TEST67 = "#comment"
 ```
 
 The result from this library and the expected result of the above is:
@@ -425,6 +432,10 @@ array(
     'TEST59' => null,
     'TEST62' => true,
     'TEST61' => true,
+    'TEST63' => 'hello # comment',
+    'TEST64' => 'hello',
+    'TEST66' => null,
+    'TEST67' => '#comment',
 );
 ```
 ## Other library comparisons
