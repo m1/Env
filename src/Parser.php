@@ -147,6 +147,8 @@ class Parser
      */
     private function parseLine($raw_line)
     {
+        $raw_line = $this->parseExport($raw_line);
+
         list($key, $value) = $this->parseKeyValue($raw_line);
 
         $key = $this->key_parser->parse($key);
@@ -156,6 +158,29 @@ class Parser
         }
 
         $this->lines[$key] = $this->value_parser->parse($value);
+    }
+
+    private function parseExport($raw_line)
+    {
+        $line = trim($raw_line);
+        
+        if ($this->string_helper->startsWith("export", $line)) {
+            $export_line = explode("export", $raw_line, 2);
+
+            if (count($export_line) !== 2 || empty($export_line[1])) {
+                throw new ParseException(
+                    'You must have a export key = value',
+                    $this->origin_exception,
+                    $this->file,
+                    $raw_line,
+                    $this->line_num
+                );
+            }
+
+            $line = trim($export_line[1]);
+        }
+
+        return $line;
     }
 
     /**

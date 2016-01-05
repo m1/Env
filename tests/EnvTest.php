@@ -290,6 +290,18 @@ class EnvTest extends \PHPUnit_Framework_TestCase
         }
     }
 
+    public function testExport()
+    {
+        $expected = array(
+            'TK1' => 'value',
+            'TK2' => 'value',
+            'TK3' => 'value',
+        );
+
+        $env = Env::Parse(__DIR__.'/mocks/export.env');
+        $this->assertSame($expected, $env);
+    }
+
     /**
      * @expectedException \InvalidArgumentException
      */
@@ -336,5 +348,13 @@ class EnvTest extends \PHPUnit_Framework_TestCase
     public function testMissingSingleQuote()
     {
         $env = Env::Parse(__DIR__.'/mocks/fail_missing_single_quote.env');
+    }
+
+    /**
+     * @expectedException \M1\Env\Exception\ParseException
+     */
+    public function testInvalidExport()
+    {
+        $env = Env::Parse(__DIR__.'/mocks/fail_export.env');
     }
 }

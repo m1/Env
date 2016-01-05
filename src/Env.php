@@ -46,38 +46,9 @@ class Env
             throw new \InvalidArgumentException(sprintf('%s is not a file or readable', $file));
         }
 
-        $setup = $this->setup();
         $parser = new Parser($file, $origin_exception);
 
         $this->contents = $parser->parse();
-
-        $this->cleanUp($setup);
-    }
-
-    /**
-     * Sets up the environment for Env
-     *
-     * @return array The array of changes
-     */
-    private function setup()
-    {
-        $setup = array(
-            'auto_detect_line_endings' => ini_get('auto_detect_line_endings')
-        );
-
-        ini_set('auto_detect_line_endings', '1');
-
-        return $setup;
-    }
-
-    /**
-     * Sets up the environment for Env
-     *
-     * @param array $setup The setup variables to change back
-     */
-    private function cleanUp(array $setup)
-    {
-        ini_set('auto_detect_line_endings', $setup['auto_detect_line_endings']);
     }
 
     /**
