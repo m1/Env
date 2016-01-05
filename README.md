@@ -27,7 +27,7 @@ Env is a lightweight library bringing .env file parser compatibility to PHP. In 
         * [Variables](#variables)
             * [Default Value/Assignment](#parameter-expansion)
         * [Comments](#comments)
-    * [.env example)(#env-example)
+    * [.env example](#env-example)
 * [Other library comparisons](#other-library-comparisons)
 * [Todo](#todo)
 * [Change log](#change-log)
