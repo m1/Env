@@ -466,10 +466,33 @@ array(
 );
 ```
 ## Other library comparisons
-todo
+
+The difference between this library and other similar libraries:
+
+#### `zrcing/phpenv`: 
+- Converts all value types to string
+- Does not support `null` values
+- Does not support `int`, `float` or `bool` types
+- Does not support variables
+
+#### `Dotenv\Dotenv`:
+- Does not support unquoted values like `33 33`, this should be cast to string. See `TEST12`
+- Does not support concatenation of variables unquoted like `${VAR} ${VAR2}`, this should be cast to string. See `TEST33`
+- Both of the above crash `Dotenv` without a helpful exception
+- Converts all value types to string
+- Does not support `null` values
+- Does not support `int`, `float` or `bool` types
+- Does not support variables
+- Does not support [parameter expansions](#parameter-expansion)
+- Does not support inline comments where there is no value. See `TEST66`
+
+#### `josegonzalez\Dotenv`:
+- Does not support unquoted variables. See `TEST31`
+- Does not support [parameter expansions](#parameter-expansion)
+- Does not support inline comments where there is no value. See `TEST66`
+- Converts null variable values to `{}`
 
 ## Todo
-- Other library comparisons
 - [Other bash parameter expansions](http://wiki.bash-hackers.org/syntax/pe#display_error_if_null_or_unset)
 
 ## Change log
