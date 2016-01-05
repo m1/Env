@@ -19,7 +19,7 @@
 namespace M1\Env\Helper;
 
 /**
- * The trait for checking types
+ * The class for string helping
  *
  * @since 1.1.0
  */
@@ -33,31 +33,6 @@ class StringHelper
     private static $bool_variants = array(
         'true', 'false', 'yes', 'no'
     );
-
-    /**
-     * Returns if value starts with a value
-     *
-     * @param string $string The value to search for
-     * @param string $line   The line to test
-     *
-     * @return bool Returns if the line starts with value
-     */
-    public function startsWith($string, $line)
-    {
-        return $string === "" || strrpos($line, $string, -strlen($line)) !== false;
-    }
-
-    /**
-     * Returns if value is a string
-     *
-     * @param string $value The value to test
-     *
-     * @return bool Is a value a string
-     */
-    public function isString($value)
-    {
-        return $this->startsWith('\'', $value) || $this->startsWith('"', $value);
-    }
 
     /**
      * Returns if value is a bool
@@ -86,6 +61,18 @@ class StringHelper
     }
 
     /**
+     * Returns if value is null
+     *
+     * @param string $value The value to test
+     *
+     * @return bool Is a value null
+     */
+    public function isNull($value)
+    {
+        return $value === 'null';
+    }
+
+    /**
      * Returns if value is number
      *
      * @param string $value The value to test
@@ -98,15 +85,15 @@ class StringHelper
     }
 
     /**
-     * Returns if value is null
+     * Returns if value is a string
      *
      * @param string $value The value to test
      *
-     * @return bool Is a value null
+     * @return bool Is a value a string
      */
-    public function isNull($value)
+    public function isString($value)
     {
-        return $value === 'null';
+        return $this->startsWith('\'', $value) || $this->startsWith('"', $value);
     }
 
     /**
@@ -121,5 +108,31 @@ class StringHelper
     public function isVariableClone($value, $matches, $quoted_string)
     {
         return (count($matches[0]) === 1) && $value == $matches[0][0] && !$quoted_string;
+    }
+
+    /**
+     * Returns if value starts with a value
+     *
+     * @param string $string The value to search for
+     * @param string $line   The line to test
+     *
+     * @return bool Returns if the line starts with value
+     */
+    public function startsWith($string, $line)
+    {
+        return $string === "" || strrpos($line, $string, -strlen($line)) !== false;
+    }
+
+    /**
+     * Strips comments from a value
+     *
+     * @param string $value The value to strip comments from
+     *
+     * @return string value
+     */
+    public function stripComments($value)
+    {
+        $value = explode("#", $value, 2);
+        return trim($value[0]);
     }
 }

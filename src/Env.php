@@ -33,13 +33,6 @@ class Env
     private $contents = array();
 
     /**
-     * The .env to parse
-     *
-     * @var string $file
-     */
-    private $file;
-
-    /**
      * Creates a new instance of Env
      *
      * @param string $file              The .env to parse
@@ -56,7 +49,6 @@ class Env
         $setup = $this->setup();
         $parser = new Parser($file, $origin_exception);
 
-        $this->file = $file;
         $this->contents = $parser->parse();
 
         $this->cleanUp($setup);

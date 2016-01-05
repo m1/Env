@@ -21,7 +21,6 @@ class EnvTest extends \PHPUnit_Framework_TestCase
 
     public function testDoubleQuotedEnv()
     {
-
         $expected = array(
             'TK1' => 'value',
             'TK2' => 'value " value',

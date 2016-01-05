@@ -110,6 +110,11 @@ class ValueParser extends AbstractParser
      * @param string $value The value to parse
      *
      * @return string|null The parsed value, or null if the value is null
+     *
+     * @uses parseString
+     * @uses parseNull
+     * @uses parseBool
+     * @uses parseNumber
      */
     private function parseValue($value)
     {
@@ -117,18 +122,34 @@ class ValueParser extends AbstractParser
             $parsed_value = $value;
 
             if ($type !== 'string') {
-                $parsed_value = $this->stripComments($value);
+                $parsed_value = $this->parser->string_helper->stripComments($value);
             }
 
-            $is_function = sprintf('is%s', ucfirst($type));
-            $parse_function = sprintf('parse%s', ucfirst($type));
-            
+            list($is_function, $parse_function) = $this->fetchFunctionNames($type);
+
             if ($this->parser->string_helper->$is_function($parsed_value)) {
                 return $this->$parse_function($parsed_value);
             }
         }
 
         return (isset($parsed_value)) ? $this->parseUnquotedString($parsed_value) : $value;
+    }
+
+    /**
+     * Gets the functions for the value type
+     *
+     * @param string $type The value type
+     *
+     * @return string[] The is and parse function names
+     */
+    private function fetchFunctionNames($type)
+    {
+        $type = ucfirst($type);
+
+        return array(
+            'is'.$type,
+            'parse'.$type
+        );
     }
 
     /**
@@ -238,18 +259,5 @@ class ValueParser extends AbstractParser
         }
 
         return (int) $value;
-    }
-
-    /**
-     * Strips comments from a value
-     *
-     * @param string $value The value to strip comments from
-     *
-     * @return string value
-     */
-    private function stripComments($value)
-    {
-        $value = explode("#", $value, 2);
-        return trim($value[0]);
     }
 }

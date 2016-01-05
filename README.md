@@ -3,10 +3,13 @@
 [![Author](http://img.shields.io/badge/author-@milescroxford-blue.svg?style=flat-square)](https://twitter.com/milescroxford)
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![Software License][ico-license]](LICENSE.md)
+
 [![Build Status][ico-travis]][link-travis]
 [![Coverage Status][ico-scrutinizer]][link-scrutinizer]
+[![HHVM tested][ico-hhvm]][link-travis]
+[![Sensio medal][ico-sensio]][link-sensio]
+[![StyleCI](https://styleci.io/repos/47935133/shield)](https://styleci.io/repos/47935133)
 [![Quality Score][ico-code-quality]][link-code-quality]
-[![Total Downloads][ico-downloads]][link-downloads]
 
 Env is a lightweight library bringing .env file parser compatibility to PHP. In short - it enables you to read .env files with PHP.
 
@@ -18,7 +21,7 @@ this library so you can load Env and other file types if you want.
 
 ## Requirements
 
-Env requires PHP version `5.3+`. It has no other dependencies.
+Env requires PHP version `5.3+` - supported and tested on `5.3`, `5.4`, `5.5`, `5.6`, `7` and `hhvm`.
 
 ## Install
 
@@ -458,8 +461,10 @@ The MIT License (MIT). Please see [License File](LICENSE.md) for more informatio
 [ico-license]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square
 [ico-travis]: https://img.shields.io/travis/m1/Env/master.svg?style=flat-square
 [ico-scrutinizer]: https://img.shields.io/scrutinizer/coverage/g/m1/Env.svg?style=flat-square
+[ico-hhvm]: https://img.shields.io/hhvm/m1/Env.svg
 [ico-code-quality]: https://img.shields.io/scrutinizer/g/m1/Env.svg?style=flat-square
 [ico-downloads]: https://img.shields.io/packagist/dt/m1/Env.svg?style=flat-square
+[ico-sensio]: https://img.shields.io/sensiolabs/i/1fb8cbab-f611-45b5-8a45-0113e433eab7.svg
 
 [link-packagist]: https://packagist.org/packages/m1/Env
 [link-travis]: https://travis-ci.org/m1/Env
@@ -468,3 +473,4 @@ The MIT License (MIT). Please see [License File](LICENSE.md) for more informatio
 [link-downloads]: https://packagist.org/packages/m1/Env
 [link-author]: https://github.com/m1
 [link-contributors]: ../../contributors
+[link-sensio]: https://insight.sensiolabs.com/projects/1fb8cbab-f611-45b5-8a45-0113e433eab7/

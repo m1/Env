@@ -242,7 +242,6 @@ class VariableParser extends AbstractParser
         }
 
         return $this->assignVariableParameterDefault($variable, $default, $empty, $type);
-
     }
 
     /**
