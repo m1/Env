@@ -100,7 +100,7 @@ class Parser
     {
         $raw_content = file($this->file, FILE_IGNORE_NEW_LINES);
 
-        if (!$raw_content) {
+        if (empty($raw_content)) {
             return array();
         }
 

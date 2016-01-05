@@ -207,9 +207,11 @@ TEST6 = ${TEST7:-bar}
 TEST8 = ${TEST9-bar}
 ```
 
-The default value parameter expansion syntax is `:-`, the explanation of the bash-hackers wiki for this is:
+The default value parameter expansion syntax is `:-`, the explanation on the (bash-hackers wiki)[http://wiki.bash-hackers.org/syntax/pe#use_a_default_value] for this is:
 > SYNTAX:
+>
 >`${PARAMETER:-WORD}`
+>
 >`${PARAMETER-WORD}`
 >
 >If the parameter PARAMETER is unset (never was defined) or null (empty), this one expands to WORD, otherwise it 
@@ -229,9 +231,11 @@ TEST7 = ${TEST6:-bar} # TEST5 is set and empty so the value of TEST7 = bar
 
 ```
 
-The assign default value parameter expansion is `:=`, the explanation on the bash-hackers wiki for this is:
+The assign default value parameter expansion is `:=`, the explanation on the (bash-hackers wiki)[http://wiki.bash-hackers.org/syntax/pe#assign_a_default_value] for this is:
 > SYNTAX:
+>
 >`${PARAMETER:=WORD}`
+>
 >`${PARAMETER=WORD}`
 >
 >This one works like the using default values, but the default text you give is not only expanded, but also assigned 

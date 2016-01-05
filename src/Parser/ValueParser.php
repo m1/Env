@@ -50,15 +50,6 @@ class ValueParser extends AbstractParser
     const REGEX_QUOTE_SINGLE_STRING = "'(?:[^'\\\\]*(?:\\\\.)?)*'";
 
     /**
-     * The bool variants available in .env
-     *
-     * @var array $bool_variants
-     */
-    private static $bool_variants = array(
-        'true', 'false', 'yes', 'no'
-    );
-
-    /**
      * The map to convert escaped characters into real characters
      *
      * @var array $character_map
@@ -117,6 +108,8 @@ class ValueParser extends AbstractParser
     private function parseValue($value)
     {
         $types = array('string', 'bool', 'number', 'null');
+
+        $parsed_value = null;
 
         foreach ($types as $type) {
             $parsed_value = $value;
@@ -186,6 +179,7 @@ class ValueParser extends AbstractParser
 
         return $matches;
     }
+    
     /**
      * Parses a .env null value
      *
@@ -195,7 +189,7 @@ class ValueParser extends AbstractParser
      */
     private function parseNull($value)
     {
-        return null;
+        return (is_null($value) || $value === "null") ? null : false;
     }
 
     /**

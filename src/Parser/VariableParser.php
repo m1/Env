@@ -154,7 +154,13 @@ class VariableParser extends AbstractParser
         list($parameter_symbol, $empty_flag) = $this->fetchParameterExpansionSymbol($variable_name, $parameter_type);
         list($variable, $default) = $this->splitVariableDefault($variable_name, $parameter_symbol);
 
-        return $this->parseVariableDefault($variable, $default, $empty_flag, $parameter_type);
+        return $this->parseVariableParameter(
+            $variable,
+            $default,
+            $this->checkVariableExists($variable, $variable, true),
+            $empty_flag && empty($this->parser->lines[$variable]),
+            $parameter_type
+        );
     }
 
     /**
@@ -208,6 +214,7 @@ class VariableParser extends AbstractParser
     private function splitVariableDefault($variable_name, $parameter_symbol)
     {
         $variable_default = explode($parameter_symbol, $variable_name, 2);
+
         if (count($variable_default) !== 2 || empty($variable_default[1])) {
             throw new ParseException(
                 'You must have valid parameter expansion syntax, eg. ${parameter:=word}',
@@ -221,29 +228,6 @@ class VariableParser extends AbstractParser
         return array(trim($variable_default[0]), trim($variable_default[1]));
     }
 
-    /**
-     * Parses and sets the variable and default if needed
-     *
-     * @param string $variable_name  The variable name to parse and set
-     * @param string $default        The default value
-     * @param bool   $check_empty    Is there a check empty flag `:`
-     * @param string $parameter_type The type of parameter expansion
-     *
-     * @return string The parsed value
-     */
-    private function parseVariableDefault($variable_name, $default, $check_empty, $parameter_type)
-    {
-        $variable_exists = $this->checkVariableExists($variable_name, $variable_name, true);
-        $variable_empty = $this->checkVariableEmpty($variable_name, $check_empty);
-
-        return $this->parseVariableParameter(
-            $variable_name,
-            $default,
-            $variable_exists,
-            $variable_empty,
-            $parameter_type
-        );
-    }
 
     /**
      * Parses and sets the variable and default if needed
@@ -262,6 +246,22 @@ class VariableParser extends AbstractParser
             return $this->parser->lines[$variable];
         }
 
+        return $this->assignVariableParameterDefault($variable, $default, $empty, $type);
+
+    }
+
+    /**
+     * Parses and sets the variable parameter to default
+     *
+     * @param string $variable The variable to parse
+     * @param string $default  The default value
+     * @param bool   $empty    Is there the variable empty if exists and the empty flag is set
+     * @param string $type     The type of parameter expansion
+     *
+     * @return string The parsed default value
+     */
+    private function assignVariableParameterDefault($variable, $default, $empty, $type)
+    {
         $default = $this->parser->value_parser->parse($default);
 
         if ($type === "assign_default_value" && $empty) {
@@ -299,19 +299,6 @@ class VariableParser extends AbstractParser
         }
 
         return true;
-    }
-
-    /**
-     * Checks to see if a variable exists
-     *
-     * @param string $variable       The variable name to get
-     * @param bool   $check_empty    Is there a check empty flag `:`
-     *
-     * @return bool Is the variable empty if the check empty flag is set
-     */
-    private function checkVariableEmpty($variable, $check_empty)
-    {
-        return $check_empty && empty($this->parser->lines[$variable]);
     }
 
     /**

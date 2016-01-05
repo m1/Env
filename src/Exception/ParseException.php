@@ -33,8 +33,6 @@ class ParseException extends \ErrorException
      * @param string $file             The .env file
      * @param string $line             The line of the value
      * @param int    $line_num         The line num of the value
-     *
-     * @return \M1\Env\Exception\ParseException The exception
      */
     public function __construct($message, $origin_exception = false, $file = null, $line = null, $line_num = null)
     {

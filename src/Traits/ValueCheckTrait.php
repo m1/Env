@@ -26,6 +26,15 @@ namespace M1\Env\Traits;
 trait ValueCheckTrait
 {
     /**
+     * The bool variants available in .env
+     *
+     * @var array $bool_variants
+     */
+    private static $bool_variants = array(
+        'true', 'false', 'yes', 'no'
+    );
+
+    /**
      * Returns if value starts with a value
      *
      * @param string $string The value to search for
