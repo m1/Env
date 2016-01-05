@@ -249,6 +249,7 @@ class ValueParser extends AbstractParser
      */
     private function stripComments($value)
     {
-        return trim(explode("#", $value, 2)[0]);
+        $value = explode("#", $value, 2);
+        return trim($value[0]);
     }
 }
