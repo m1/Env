@@ -13,6 +13,31 @@
 
 Env is a lightweight library bringing .env file parser compatibility to PHP. In short - it enables you to read .env files with PHP.
 
+* [Why?](#why)
+* [Requirements](#requirements)
+* [Install](#install)
+* [Usage](#usage)
+    * [Basic](#basic)
+    * [Syntax](#syntax)
+        * [Assignment](#assignment)
+        * [Strings](#strings)
+        * [Numbers](#numbers)
+        * [Booleans](#booleans)
+        * [Null](#null)
+        * [Variables](#variables)
+            * [Default Value/Assignment](#parameter-expansion)
+        * [Comments](#comments)
+    * [.env example)(#env-example)
+* [Other library comparisons](#other-library-comparisons)
+* [Todo](#todo)
+* [Change log](#change-log)
+* [Testing](#testing)
+* [Contributing](#Contributing)
+* [Security](#security)
+* [Credits](#credits)
+* [License](#license)
+
+
 ## Why?
 Env aims to bring a unified parser for env together for PHP rather than having a few incomplete or buggy parsers written 
 into other libraries. This library is not meant as a complete package for config loading like other libraries as this 
@@ -203,6 +228,8 @@ TEST2 = ${TEST1} # `null` type
 TEST3 = "${TEST1}" # `string` type
 ```
 
+##### Parameter Expansion
+
 You can do parameter expansion, so far you can only do [default values](http://wiki.bash-hackers.org/syntax/pe#use_a_default_value) 
 and [assign default values](http://wiki.bash-hackers.org/syntax/pe#assign_a_default_value) like in the bash syntax:
 
@@ -268,7 +295,7 @@ To comment, just use the `#` syntax, you can also comment inline like so:
 TEST1 = bar # and so is this
 ```
 
-### full .env example
+### .env example
 
 ```bash
 # Comments are done like this
@@ -360,9 +387,9 @@ TEST59=${TEST60:=null} # TEST59 = null TEST60 = null -- both `null` types
 TEST61=${TEST62:=true} # TEST61 = true TEST62 = true -- both `bool` types
 
 # Comments
-TEST62 = hello # comment
-TEST63 = "hello # comment"
-TEST64 = "hello" #comment
+TEST63 = hello # comment
+TEST64 = "hello # comment"
+TEST65 = "hello" #comment
 TEST66 = #comment
 TEST67 = "#comment"
 ```
@@ -441,6 +468,9 @@ array(
 ## Other library comparisons
 todo
 
+## Todo
+- Other library comparisons
+- [Other bash parameter expansions](http://wiki.bash-hackers.org/syntax/pe#display_error_if_null_or_unset)
 ## Change log
 
 Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recently.

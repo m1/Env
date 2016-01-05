@@ -249,10 +249,11 @@ class EnvTest extends \PHPUnit_Framework_TestCase
             'TEST59' => null,
             'TEST62' => true,
             'TEST61' => true,
-            'TEST63' => 'hello # comment',
-            'TEST64' => 'hello',
+            'TEST63' => 'hello',
+            'TEST64' => 'hello # comment',
+            'TEST65' => 'hello',
             'TEST66' => null,
-            'TEST67' => '#comment',
+            'TEST67' => '#comment'
         );
 
         $env = Env::Parse(__DIR__.'/mocks/all_testcase.env');
