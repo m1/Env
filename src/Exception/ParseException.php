@@ -29,18 +29,12 @@ class ParseException extends \ErrorException
      * Constructs a ParseException
      *
      * @param string $message          The value to parse
-     * @param bool   $origin_exception To throw the exception in the .env
-     * @param string $file             The .env file
      * @param string $line             The line of the value
      * @param int    $line_num         The line num of the value
      */
-    public function __construct($message, $origin_exception = false, $file = null, $line = null, $line_num = null)
+    public function __construct($message, $line = null, $line_num = null)
     {
-        $message = $this->createMessage($message, $file, $line, $line_num);
-
-        if ($origin_exception) {
-            parent::__construct($message, 0, 1, $file, $line_num);
-        }
+        $message = $this->createMessage($message, $line, $line_num);
 
         parent::__construct($message);
     }
@@ -49,18 +43,13 @@ class ParseException extends \ErrorException
      * Constructs a ParseException message
      *
      * @param string $message          The value to parse
-     * @param string $file             The .env file
      * @param string $line             The line of the value
      * @param int    $line_num         The line num of the value
      *
      * @return string The exception message
      */
-    private function createMessage($message, $file, $line, $line_num)
+    private function createMessage($message, $line, $line_num)
     {
-        if (!is_null($file)) {
-            $message .= sprintf(" in %s", $file);
-        }
-
         if (!is_null($line)) {
             $message .= sprintf(" near %s", $line);
         }

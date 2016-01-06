@@ -213,8 +213,6 @@ class VariableParser extends AbstractParser
         if (count($variable_default) !== 2 || empty($variable_default[1])) {
             throw new ParseException(
                 'You must have valid parameter expansion syntax, eg. ${parameter:=word}',
-                $this->parser->origin_exception,
-                $this->parser->file,
                 $variable_name,
                 $this->parser->line_num
             );
@@ -285,8 +283,6 @@ class VariableParser extends AbstractParser
 
             throw new ParseException(
                 sprintf('Variable has not been defined: %s', $variable),
-                $this->parser->origin_exception,
-                $this->parser->file,
                 $value,
                 $this->parser->line_num
             );

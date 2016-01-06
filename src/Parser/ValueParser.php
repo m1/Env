@@ -193,8 +193,6 @@ class ValueParser extends AbstractParser
         if (!preg_match('/'.$regex.'/', $value, $matches)) {
             throw new ParseException(
                 sprintf('Missing end %s quote', $symbol),
-                $this->parser->origin_exception,
-                $this->parser->file,
                 $value,
                 $this->parser->line_num
             );

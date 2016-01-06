@@ -47,8 +47,6 @@ class KeyParser extends AbstractParser
         if (!ctype_alnum(str_replace('_', '', $key))) {
             throw new ParseException(
                 sprintf('Key can only contain alphanumeric and underscores: %s', $key),
-                $this->parser->origin_exception,
-                $this->parser->file,
                 $key,
                 $this->parser->line_num
             );
