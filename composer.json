@@ -30,7 +30,8 @@
         "squizlabs/php_codesniffer": "^2.3"
     },
     "suggest": {
-        "m1/vars": "For loading of env config"
+        "josegonzalez/dotenv": "For loading of .env",
+        "m1/vars": "For loading of configs"
     },
     "autoload": {
         "psr-4": {
