@@ -28,6 +28,8 @@ Env is a lightweight library bringing .env file parser compatibility to PHP. In 
             * [Default Value/Assignment](#parameter-expansion)
         * [Comments](#comments)
     * [.env example](#env-example)
+* [Notes](#notes)
+    * [Source](#source)
 * [Other library comparisons](#other-library-comparisons)
 * [Todo](#todo)
 * [Change log](#change-log)
@@ -42,7 +44,8 @@ Env is a lightweight library bringing .env file parser compatibility to PHP. In 
 Env aims to bring a unified parser for env together for PHP rather than having a few incomplete or buggy parsers written 
 into other libraries. This library is not meant as a complete package for config loading like other libraries as this 
 is out of scope for this library. If you need something like that check out [Vars](http://github.com/m1/Vars) which incorporates
-this library so you can load Env and other file types if you want.
+this library so you can load Env and other file types if you want, or checkout [PHP Dotenv](https://github.com/josegonzalez/php-dotenv)
+if you only need .env parsing
 
 ## Requirements
 
@@ -71,13 +74,13 @@ example.php
 //both examples return the same thing
 
 // example 1 -- standard
-use M1\Env\Env;
+use M1\Env\Parser;
 
-$env = new Env('test.env');
-$arr = $env->getContents();
+$env = new Parser(file_get_contents('test.env'));
+$arr = $env->getContent();
 
 // example 2 -- statically
-$arr = Env::parse('test.env');
+$arr = Parser::parse(file_get_contents('test.env'));
 
 var_dump($arr);
 // [
@@ -98,6 +101,20 @@ TEST3 =VALUE
 TEST4=VALUE
  TEST5 = VALUE
 TEST6  =   VALUE
+```
+
+However keys can not start with a number, e.g.:
+
+```bash
+1notvalid = nope
+```
+
+Will throw a `ParseException`
+
+You can also add `export` to the start of variables to `source` the file in bash ([see here](#source) for more info):
+
+```bash
+export TEST1=value
 ```
 
 #### Strings
@@ -295,6 +312,12 @@ To comment, just use the `#` syntax, you can also comment inline like so:
 TEST1 = bar # and so is this
 ```
 
+If you put a `#` without a space in a unquoted string, it will be parsed as a string:
+
+```bash
+TEST1 = hello#notacomment
+```
+
 ### .env example
 
 ```bash
@@ -392,6 +415,7 @@ TEST64 = "hello # comment"
 TEST65 = "hello" #comment
 TEST66 = #comment
 TEST67 = "#comment"
+TEST68 = thisisnota#comment
 ```
 
 The result from this library and the expected result of the above is:
@@ -463,8 +487,21 @@ array(
     'TEST64' => 'hello',
     'TEST66' => null,
     'TEST67' => '#comment',
+    'TEST68' => 'thisisnota#comment',
 );
 ```
+## Notes
+
+### Source
+
+If you need the .env variables in other applications, you can `source` the env, but make sure it's valid bash syntax, as this parser allows a more relaxed form of bash syntax.
+
+```bash
+source .env
+```
+
+This library will always be able to parse bash syntax, but for now the opposite (env syntax -> bash syntax) may not be true, however this is being worked on to bring a strict parser version for `3.0`
+
 ## Other library comparisons
 
 The difference between this library and other similar libraries:
@@ -486,11 +523,6 @@ The difference between this library and other similar libraries:
 - Does not support [parameter expansions](#parameter-expansion)
 - Does not support inline comments where there is no value. See `TEST66`
 
-#### `josegonzalez\Dotenv`:
-- Does not support unquoted variables. See `TEST31`
-- Does not support [parameter expansions](#parameter-expansion)
-- Does not support inline comments where there is no value. See `TEST66`
-- Converts null variable values to `{}`
 
 ## Todo
 - [Other bash parameter expansions](http://wiki.bash-hackers.org/syntax/pe#display_error_if_null_or_unset)
