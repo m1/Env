@@ -31,13 +31,6 @@ use M1\Env\Parser\KeyParser;
 class Parser
 {
     /**
-     * The .env to parse
-     *
-     * @var string $file
-     */
-    public $file;
-
-    /**
      * The Env key parser
      *
      * @var \M1\Env\Parser\KeyParser $key_parser
@@ -56,14 +49,7 @@ class Parser
      *
      * @var array $lines
      */
-    public $lines;
-
-    /**
-     * If to throw ParseException in the .env
-     *
-     * @var bool $origin_exception
-     */
-    public $origin_exception;
+    public $lines = array();
 
     /**
      * The String helper class
@@ -83,49 +69,76 @@ class Parser
     /**
      * The parser constructor
      *
-     * @param string $file             The .env to parse
-     * @param bool   $origin_exception Whether or not to throw ParseException in the .env
+     * @param string      $content          The
      */
-    public function __construct($file, $origin_exception = false)
+    public function __construct($content)
     {
-        $this->file = $file;
-        $this->origin_exception = $origin_exception;
         $this->key_parser = new KeyParser($this);
         $this->value_parser = new ValueParser($this);
         $this->string_helper = new StringHelper();
+
+        $this->doParse($content);
+    }
+
+    /**
+     * Parses the .env and returns the contents statically
+     *
+     * @param string $content The content to parse
+     *
+     * @return array The .env contents
+     */
+    public static function parse($content)
+    {
+        $parser = new Parser($content);
+
+        return $parser->getContent();
     }
 
     /**
      * Opens the .env, parses it then returns the contents
      *
+     * @param string $content The content to parse
+     *
      * @return array The .env contents
      */
-    public function parse()
+    private function doParse($content)
     {
-        $raw_content = file($this->file, FILE_IGNORE_NEW_LINES);
+        $raw_lines = array_filter($this->makeLines($content), 'strlen');
 
-        if (empty($raw_content)) {
-            return array();
+        if (empty($raw_lines)) {
+            return;
         }
 
-        return $this->parseContent($raw_content);
+        return $this->parseContent($raw_lines);
+    }
+
+    /**
+     * Splits the string into an array
+     *
+     * @param string $content The string content to split
+     *
+     * @return array The array of lines to parse
+     */
+    private function makeLines($content)
+    {
+        return explode("\n", str_replace(array("\r\n", "\n\r", "\r"), "\n", $content));
     }
 
     /**
      * Parses the .env line by line
      *
-     * @param array $raw_content The raw content of the file
+     * @param array $raw_lines The raw content of the file
      *
      * @throws \M1\Env\Exception\ParseException If the file does not have a key=value structure
      *
      * @return array The .env contents
      */
-    public function parseContent(array $raw_content)
+    private function parseContent(array $raw_lines)
     {
         $this->lines = array();
         $this->line_num = 0;
 
-        foreach ($raw_content as $raw_line) {
+        foreach ($raw_lines as $raw_line) {
             $this->line_num++;
 
             if ($this->string_helper->startsWith('#', $raw_line) || !$raw_line) {
@@ -160,6 +173,15 @@ class Parser
         $this->lines[$key] = $this->value_parser->parse($value);
     }
 
+    /**
+     * Parses a export line of the .env
+     *
+     * @param string $raw_line The raw content of the line
+     *
+     * @throws \M1\Env\Exception\ParseException If the file does not have a key=value structure
+     *
+     * @return string The parsed line
+     */
     private function parseExport($raw_line)
     {
         $line = trim($raw_line);
@@ -170,8 +192,6 @@ class Parser
             if (count($export_line) !== 2 || empty($export_line[1])) {
                 throw new ParseException(
                     'You must have a export key = value',
-                    $this->origin_exception,
-                    $this->file,
                     $raw_line,
                     $this->line_num
                 );
@@ -199,13 +219,21 @@ class Parser
         if (count($key_value) !== 2) {
             throw new ParseException(
                 'You must have a key = value',
-                $this->origin_exception,
-                $this->file,
                 $raw_line,
                 $this->line_num
             );
         }
 
         return $key_value;
+    }
+
+    /**
+     * Returns the contents of the .env
+     *
+     * @return array The .env contents
+     */
+    public function getContent()
+    {
+        return $this->lines;
     }
 }

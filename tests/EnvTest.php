@@ -2,7 +2,7 @@
 
 namespace M1\Env\Test;
 
-use \M1\Env\Env;
+use \M1\Env\Parser;
 use \M1\Env\Exception\ParseException;
 
 class EnvTest extends \PHPUnit_Framework_TestCase
@@ -15,7 +15,7 @@ class EnvTest extends \PHPUnit_Framework_TestCase
             'TK3' => 'value',
         );
 
-        $env = Env::Parse(__DIR__.'/mocks/simple.env');
+        $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/simple.env'));
         $this->assertSame($expected, $env);
     }
 
@@ -33,7 +33,7 @@ class EnvTest extends \PHPUnit_Framework_TestCase
             'TK9' => 'value',
         );
 
-        $env = Env::Parse(__DIR__.'/mocks/double_quoted.env');
+        $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/double_quoted.env'));
         $this->assertEquals($expected, $env);
     }
 
@@ -51,7 +51,7 @@ class EnvTest extends \PHPUnit_Framework_TestCase
             'TK9' => 'value',
         );
 
-        $env = Env::Parse(__DIR__.'/mocks/single_quoted.env');
+        $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/single_quoted.env'));
         $this->assertSame($expected, $env);
     }
 
@@ -68,7 +68,7 @@ class EnvTest extends \PHPUnit_Framework_TestCase
             'TK8' => false,
         );
 
-        $env = Env::Parse(__DIR__.'/mocks/bool.env');
+        $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/bool.env'));
         $this->assertSame($expected, $env);
     }
 
@@ -80,7 +80,7 @@ class EnvTest extends \PHPUnit_Framework_TestCase
             'TK3' => "33 33",
         );
 
-        $env = Env::Parse(__DIR__.'/mocks/numbers.env');
+        $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/numbers.env'));
         $this->assertSame($expected, $env);
     }
 
@@ -91,7 +91,7 @@ class EnvTest extends \PHPUnit_Framework_TestCase
             'TK2' => null,
         );
 
-        $env = Env::Parse(__DIR__.'/mocks/null.env');
+        $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/null.env'));
         $this->assertSame($expected, $env);
     }
 
@@ -100,11 +100,11 @@ class EnvTest extends \PHPUnit_Framework_TestCase
         $expected = array(
             'TK1' => 'value',
             'TK2' => 'value',
-            'TK3' => 'value',
+            'TK3' => 'value#thisisnotacomment',
             'TK4' => null
         );
 
-        $env = Env::Parse(__DIR__.'/mocks/comments.env');
+        $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/comments.env'));
         $this->assertSame($expected, $env);
     }
 
@@ -113,7 +113,7 @@ class EnvTest extends \PHPUnit_Framework_TestCase
         $expected = array(
         );
 
-        $env = Env::Parse(__DIR__.'/mocks/empty_file.env');
+        $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/empty_file.env'));
         $this->assertSame($expected, $env);
     }
 
@@ -157,7 +157,7 @@ class EnvTest extends \PHPUnit_Framework_TestCase
             'test_variable_17' => 'hello "hello" hello hey there with escaped \' !',
         );
 
-        $env = Env::Parse(__DIR__.'/mocks/variables.env');
+        $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/variables.env'));
         $this->assertEquals($expected, $env);
     }
 
@@ -181,7 +181,7 @@ class EnvTest extends \PHPUnit_Framework_TestCase
             'TK11' => true,
         );
 
-        $env = Env::Parse(__DIR__.'/mocks/variable_parameter_expansion.env');
+        $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/variable_parameter_expansion.env'));
         $this->assertEquals($expected, $env);
     }
 
@@ -253,10 +253,11 @@ class EnvTest extends \PHPUnit_Framework_TestCase
             'TEST64' => 'hello # comment',
             'TEST65' => 'hello',
             'TEST66' => null,
-            'TEST67' => '#comment'
+            'TEST67' => '#comment',
+            'TEST68' => 'thisisnota#comment',
         );
 
-        $env = Env::Parse(__DIR__.'/mocks/all_testcase.env');
+        $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/all_testcase.env'));
         $this->assertEquals($expected, $env);
     }
 
@@ -265,7 +266,7 @@ class EnvTest extends \PHPUnit_Framework_TestCase
         $expected = array(
         );
 
-        $env = Env::Parse(__DIR__.'/mocks/other.env');
+        $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/other.env'));
         $this->assertSame($expected, $env);
     }
 
@@ -277,17 +278,8 @@ class EnvTest extends \PHPUnit_Framework_TestCase
             'test_key_3' => ""
         );
 
-        $env = Env::Parse(__DIR__.'/mocks/null_variable.env');
+        $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/null_variable.env'));
         $this->assertSame($expected, $env);
-    }
-
-    public function testParseOriginException()
-    {
-        try {
-            $env = Env::Parse(__DIR__.'/mocks/fail_simple.env', true);
-        } catch (ParseException $e) {
-            $this->assertEquals(__DIR__ . '/mocks/fail_simple.env', $e->getFile());
-        }
     }
 
     public function testExport()
@@ -298,16 +290,8 @@ class EnvTest extends \PHPUnit_Framework_TestCase
             'TK3' => 'value',
         );
 
-        $env = Env::Parse(__DIR__.'/mocks/export.env');
+        $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/export.env'));
         $this->assertSame($expected, $env);
-    }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     */
-    public function testNotAFile()
-    {
-        $env = Env::Parse(__DIR__.'/mocks/NONE.env');
     }
 
     /**
@@ -315,7 +299,15 @@ class EnvTest extends \PHPUnit_Framework_TestCase
      */
     public function testInvalidKey()
     {
-        $env = Env::Parse(__DIR__.'/mocks/fail_invalid_key.env');
+        $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/fail_invalid_key.env'));
+    }
+
+    /**
+     * @expectedException \M1\Env\Exception\ParseException
+     */
+    public function testInvalidKeyNumber()
+    {
+        $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/fail_invalid_key_number.env'));
     }
 
     /**
@@ -323,7 +315,7 @@ class EnvTest extends \PHPUnit_Framework_TestCase
      */
     public function testOnlyKey()
     {
-        $env = Env::Parse(__DIR__.'/mocks/fail_only_key.env');
+        $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/fail_only_key.env'));
     }
 
     /**
@@ -331,7 +323,7 @@ class EnvTest extends \PHPUnit_Framework_TestCase
      */
     public function testUndefinedVariable()
     {
-        $env = Env::Parse(__DIR__.'/mocks/fail_undefined_variable.env');
+        $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/fail_undefined_variable.env'));
     }
 
     /**
@@ -339,7 +331,7 @@ class EnvTest extends \PHPUnit_Framework_TestCase
      */
     public function testInvalidParameterExpansion()
     {
-        $env = Env::Parse(__DIR__.'/mocks/fail_invalid_parameter_expansion.env');
+        $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/fail_invalid_parameter_expansion.env'));
     }
 
     /**
@@ -347,7 +339,7 @@ class EnvTest extends \PHPUnit_Framework_TestCase
      */
     public function testMissingSingleQuote()
     {
-        $env = Env::Parse(__DIR__.'/mocks/fail_missing_single_quote.env');
+        $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/fail_missing_single_quote.env'));
     }
 
     /**
@@ -355,6 +347,6 @@ class EnvTest extends \PHPUnit_Framework_TestCase
      */
     public function testInvalidExport()
     {
-        $env = Env::Parse(__DIR__.'/mocks/fail_export.env');
+        $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/fail_export.env'));
     }
 }
