@@ -3,6 +3,7 @@
 namespace M1\Env\Test;
 
 use \M1\Env\Parser;
+use \M1\Env\Exception\ParseException;
 
 class EnvTest extends \PHPUnit_Framework_TestCase
 {
@@ -99,7 +100,7 @@ class EnvTest extends \PHPUnit_Framework_TestCase
         $expected = array(
             'TK1' => 'value',
             'TK2' => 'value',
-            'TK3' => 'value',
+            'TK3' => 'value#thisisnotacomment',
             'TK4' => null
         );
 
@@ -113,7 +114,6 @@ class EnvTest extends \PHPUnit_Framework_TestCase
         );
 
         $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/empty_file.env'));
-
         $this->assertSame($expected, $env);
     }
 
@@ -253,7 +253,8 @@ class EnvTest extends \PHPUnit_Framework_TestCase
             'TEST64' => 'hello # comment',
             'TEST65' => 'hello',
             'TEST66' => null,
-            'TEST67' => '#comment'
+            'TEST67' => '#comment',
+            'TEST68' => 'thisisnota#comment',
         );
 
         $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/all_testcase.env'));

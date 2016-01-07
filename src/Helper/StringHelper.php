@@ -132,7 +132,7 @@ class StringHelper
      */
     public function stripComments($value)
     {
-        $value = explode("#", $value, 2);
+        $value = explode(" #", $value, 2);
         return trim($value[0]);
     }
 }
