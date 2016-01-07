@@ -2,6 +2,15 @@
 
 All Notable changes to `Env` will be documented in this file
 
+## 2.0.0 - 2016-01-07
+### Altered
+- Must pass `file_get_contents()` or content string to `parser` not a `file`
+- Keys must not start with a number
+- Make `#` in unquoted into string if no space, e.g. `value#notacomment`
+
+### Removed
+- File logic (Env.php)
+
 ## 1.1.0 - 2016-01-05
 ### Added
 - Support for parameter expansions: [default value](http://wiki.bash-hackers.org/syntax/pe#use_a_default_value) and [assign default value](http://wiki.bash-hackers.org/syntax/pe#assign_a_default_value)
