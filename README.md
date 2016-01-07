@@ -6,7 +6,7 @@
 [![Build Status][ico-travis]][link-travis]
 [![Coverage Status][ico-scrutinizer]][link-scrutinizer]
 [![Quality Score][ico-code-quality]][link-code-quality]
-[![HHVM tested][ico-hhvm]][link-travis]
+[![Downloads][ico-downloads]][link-downloads]
 [![StyleCI](https://styleci.io/repos/47935133/shield)](https://styleci.io/repos/47935133)
 
 [![Sensio badge][ico-sensio]][link-sensio]
