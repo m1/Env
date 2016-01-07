@@ -49,7 +49,7 @@ class Parser
      *
      * @var array $lines
      */
-    public $lines;
+    public $lines = array();
 
     /**
      * The String helper class
@@ -83,7 +83,7 @@ class Parser
     /**
      * Parses the .env and returns the contents statically
      *
-     * @param string      $content          The
+     * @param string $content The content to parse
      *
      * @return array The .env contents
      */
@@ -97,11 +97,13 @@ class Parser
     /**
      * Opens the .env, parses it then returns the contents
      *
+     * @param string $content The content to parse
+     *
      * @return array The .env contents
      */
     private function doParse($content)
     {
-        $raw_lines = $this->makeLines($content);
+        $raw_lines = array_filter($this->makeLines($content), 'strlen');
 
         if (empty($raw_lines)) {
             return;
@@ -110,6 +112,13 @@ class Parser
         return $this->parseContent($raw_lines);
     }
 
+    /**
+     * Splits the string into an array
+     *
+     * @param string $content The string content to split
+     *
+     * @return array The array of lines to parse
+     */
     private function makeLines($content)
     {
         return explode("\n", str_replace(array("\r\n", "\n\r", "\r"), "\n", $content));
@@ -164,6 +173,15 @@ class Parser
         $this->lines[$key] = $this->value_parser->parse($value);
     }
 
+    /**
+     * Parses a export line of the .env
+     *
+     * @param string $raw_line The raw content of the line
+     *
+     * @throws \M1\Env\Exception\ParseException If the file does not have a key=value structure
+     *
+     * @return string The parsed line
+     */
     private function parseExport($raw_line)
     {
         $line = trim($raw_line);

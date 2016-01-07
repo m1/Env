@@ -305,6 +305,14 @@ class EnvTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \M1\Env\Exception\ParseException
      */
+    public function testInvalidKeyNumber()
+    {
+        $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/fail_invalid_key_number.env'));
+    }
+
+    /**
+     * @expectedException \M1\Env\Exception\ParseException
+     */
     public function testOnlyKey()
     {
         $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/fail_only_key.env'));

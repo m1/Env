@@ -124,6 +124,18 @@ class StringHelper
     }
 
     /**
+     * Returns if value starts with a number
+     *
+     * @param string $line   The line to test
+     *
+     * @return bool Returns if the line starts with a number
+     */
+    public function startsWithNumber($line)
+    {
+        return is_numeric(substr($line, 0, 1));
+    }
+
+    /**
      * Strips comments from a value
      *
      * @param string $value The value to strip comments from

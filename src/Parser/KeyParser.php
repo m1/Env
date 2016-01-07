@@ -44,9 +44,9 @@ class KeyParser extends AbstractParser
             return false;
         }
 
-        if (!ctype_alnum(str_replace('_', '', $key))) {
+        if (!ctype_alnum(str_replace('_', '', $key)) || $this->parser->string_helper->startsWithNumber($key)) {
             throw new ParseException(
-                sprintf('Key can only contain alphanumeric and underscores: %s', $key),
+                sprintf('Key can only contain alphanumeric and underscores and can not start with a number: %s', $key),
                 $key,
                 $this->parser->line_num
             );
