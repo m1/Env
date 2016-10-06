@@ -161,10 +161,12 @@ class ValueParser extends AbstractParser
      */
     private function parseString($value)
     {
+        $single = false;
         $regex = self::REGEX_QUOTE_DOUBLE_STRING;
         $symbol = '"';
 
         if ($this->parser->string_helper->startsWith('\'', $value)) {
+            $single = true;
             $regex =  self::REGEX_QUOTE_SINGLE_STRING;
             $symbol = "'";
         }
@@ -174,7 +176,7 @@ class ValueParser extends AbstractParser
         $value = trim($matches[0], $symbol);
         $value = strtr($value, self::$character_map);
 
-        return $this->variable_parser->parse($value, true);
+        return ($single) ? $value : $this->variable_parser->parse($value, true);
     }
 
     /**
@@ -222,7 +224,7 @@ class ValueParser extends AbstractParser
      */
     private function parseUnquotedString($value)
     {
-        if ($value == "") {
+        if ($value === "") {
             return null;
         }
 

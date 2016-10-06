@@ -245,6 +245,12 @@ TEST2 = ${TEST1} # `null` type
 TEST3 = "${TEST1}" # `string` type
 ```
 
+Single Quotes with variables will be counted as strings:
+```bash
+TEST1 = '${hello} # `string` type, will output: '${hello}'
+```
+
+
 ##### Parameter Expansion
 
 You can do parameter expansion, so far you can only do [default values](http://wiki.bash-hackers.org/syntax/pe#use_a_default_value) 
@@ -396,6 +402,7 @@ TEST43 = ${TEST40} ${TEST41} # true false -- `string` type
 TEST44 = null
 TEST45 = ${TEST44} # null -- `null` type
 TEST46 = "${TEST44}" # '' -- `string` type
+TEST46_5 = '${TEST44}' # '' -- `string` type
 
 TEST47=foo
 TEST48=${TEST47:=bar}
@@ -468,6 +475,7 @@ array(
     "TEST44" => null,
     "TEST45" => null,
     "TEST46" => "",
+    "TEST46_5" => "${TEST44}",
     'TEST47' => 'foo',
     'TEST48' => 'foo',
     'TEST50' => 'foo',

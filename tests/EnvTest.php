@@ -145,7 +145,7 @@ class EnvTest extends \PHPUnit_Framework_TestCase
             'test_variable_5' => "true",
             'test_variable_6' => true,
             'test_variable_7' => "true/true",
-            'test_variable_8' => 'true',
+            'test_variable_8' => '${bool_1}',
             'test_variable_9' => "1",
             'test_variable_10' => "3.14/1",
             'test_variable_11' => "2/1",
