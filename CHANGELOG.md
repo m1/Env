@@ -2,6 +2,10 @@
 
 All Notable changes to `Env` will be documented in this file
 
+## 2.1.0 - 2016-10-06
+### Fixed
+- Single quote variables in single quotes will be treated as strings
+
 ## 2.0.0 - 2016-01-07
 ### Altered
 - Must pass `file_get_contents()` or content string to `parser` not a `file`
