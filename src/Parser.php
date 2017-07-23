@@ -69,7 +69,7 @@ class Parser
     /**
      * The parser constructor
      *
-     * @param string      $content          The
+     * @param string      $content          The content to parse
      */
     public function __construct($content)
     {
