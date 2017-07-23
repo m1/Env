@@ -78,12 +78,13 @@ class ValueParser extends AbstractParser
      * {@inheritdoc}
      *
      * @param \M1\Env\Parser $parser The parent parser
+     * @param array $context Variables context
      */
-    public function __construct($parser)
+    public function __construct($parser, array $context = array())
     {
         parent::__construct($parser);
 
-        $this->variable_parser = new VariableParser($parser);
+        $this->variable_parser = new VariableParser($parser, $context);
     }
 
     /**
