@@ -50,6 +50,26 @@ class VariableParser extends AbstractParser
     const SYMBOL_DEFAULT_VALUE = '-';
 
     /**
+     * Variables context
+     *
+     * @var array
+     */
+    private $context;
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param \M1\Env\Parser $parser The parent parser
+     * @param array $context Variables context
+     */
+    public function __construct($parser, array $context = array())
+    {
+        parent::__construct($parser);
+
+        $this->context = $context;
+    }
+
+    /**
      * Parses a .env variable
      *
      * @param string $value         The value to parse
@@ -93,20 +113,26 @@ class VariableParser extends AbstractParser
     /**
      * Parses a .env variable
      *
-     * @param string $value         The value to parse
+     * @param string $value The value to parse
      * @param string $variable_name The variable name to get
-     * @param array  $matches       The matches of the variables
-     * @param bool   $quoted_string Is the value in a quoted string
+     * @param array $matches The matches of the variables
+     * @param bool $quoted_string Is the value in a quoted string
      *
      * @return string The parsed value
+     * @throws \M1\Env\Exception\ParseException If the variable can not be found
      */
     private function fetchVariable($value, $variable_name, $matches, $quoted_string)
     {
         if ($this->hasParameterExpansion($variable_name)) {
             $replacement = $this->fetchParameterExpansion($variable_name);
+        } elseif ($this->hasVariable($variable_name)) {
+            $replacement = $this->getVariable($variable_name);
         } else {
-            $this->checkVariableExists($value, $variable_name);
-            $replacement = $this->parser->lines[$variable_name];
+            throw new ParseException(
+                sprintf('Variable has not been defined: %s', $variable_name),
+                $value,
+                $this->parser->line_num
+            );
         }
 
         if ($this->parser->string_helper->isBoolInString($replacement, $quoted_string, count($matches[0]))) {
@@ -148,11 +174,13 @@ class VariableParser extends AbstractParser
         list($parameter_symbol, $empty_flag) = $this->fetchParameterExpansionSymbol($variable_name, $parameter_type);
         list($variable, $default) = $this->splitVariableDefault($variable_name, $parameter_symbol);
 
+        $value = $this->getVariable($variable);
+
         return $this->parseVariableParameter(
             $variable,
             $default,
-            $this->checkVariableExists($variable, $variable, true),
-            $empty_flag && empty($this->parser->lines[$variable]),
+            $this->hasVariable($variable),
+            $empty_flag && empty($value),
             $parameter_type
         );
     }
@@ -236,7 +264,7 @@ class VariableParser extends AbstractParser
     private function parseVariableParameter($variable, $default, $exists, $empty, $type)
     {
         if ($exists && !$empty) {
-            return $this->parser->lines[$variable];
+            return $this->getVariable($variable);
         }
 
         return $this->assignVariableParameterDefault($variable, $default, $empty, $type);
@@ -266,29 +294,41 @@ class VariableParser extends AbstractParser
     /**
      * Checks to see if a variable exists
      *
-     * @param string $value          The value to throw an error with if doesn't exist
-     * @param string $variable       The variable name to get
-     * @param bool   $variable_check Are you checking to only see if a variable exists and not to throw an exception
+     * @param string $variable The variable name to get
      *
-     * @throws \M1\Env\Exception\ParseException If the variable can not be found and `$variable_check` is false
-     *
-     * @return bool Does the variable exist
+     * @return bool
      */
-    private function checkVariableExists($value, $variable, $variable_check = false)
+    private function hasVariable($variable)
     {
-        if (!array_key_exists($variable, $this->parser->lines)) {
-            if ($variable_check) {
-                return false;
-            }
-
-            throw new ParseException(
-                sprintf('Variable has not been defined: %s', $variable),
-                $value,
-                $this->parser->line_num
-            );
+        if (array_key_exists($variable, $this->parser->lines)) {
+            return true;
         }
 
-        return true;
+        if (array_key_exists($variable, $this->context)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Get variable value
+     *
+     * @param string $variable
+     *
+     * @return mixed
+     */
+    private function getVariable($variable)
+    {
+        if (array_key_exists($variable, $this->parser->lines)) {
+            return $this->parser->lines[$variable];
+        }
+
+        if (array_key_exists($variable, $this->context)) {
+            return $this->context[$variable];
+        }
+
+        return null;
     }
 
     /**

@@ -69,12 +69,13 @@ class Parser
     /**
      * The parser constructor
      *
-     * @param string      $content          The
+     * @param string $content The content to parse
+     * @param array $context Variables context
      */
-    public function __construct($content)
+    public function __construct($content, array $context = array())
     {
         $this->key_parser = new KeyParser($this);
-        $this->value_parser = new ValueParser($this);
+        $this->value_parser = new ValueParser($this, $context);
         $this->string_helper = new StringHelper();
 
         $this->doParse($content);
@@ -84,12 +85,13 @@ class Parser
      * Parses the .env and returns the contents statically
      *
      * @param string $content The content to parse
+     * @param array $context Variables context
      *
      * @return array The .env contents
      */
-    public static function parse($content)
+    public static function parse($content, array $context = array())
     {
-        $parser = new Parser($content);
+        $parser = new Parser($content, $context);
 
         return $parser->getContent();
     }
@@ -185,7 +187,7 @@ class Parser
     private function parseExport($raw_line)
     {
         $line = trim($raw_line);
-        
+
         if ($this->string_helper->startsWith("export", $line)) {
             $export_line = explode("export", $raw_line, 2);
 

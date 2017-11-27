@@ -18,6 +18,7 @@ Env is a lightweight library bringing .env file parser compatibility to PHP. In 
 * [Install](#install)
 * [Usage](#usage)
     * [Basic](#basic)
+    * [Context variables](#context)
     * [Syntax](#syntax)
         * [Assignment](#assignment)
         * [Strings](#strings)
@@ -69,7 +70,8 @@ TEST_1 = VALUE
 ```
 
 example.php
-``` php
+```php
+<?php
 
 //both examples return the same thing
 
@@ -85,6 +87,35 @@ $arr = Parser::parse(file_get_contents('test.env'));
 var_dump($arr);
 // [
 //      "TEST_1" => "VALUE"
+// ]
+```
+### Context variables
+
+test_context.env
+```bash
+TEST_1 = $EXTERNAL
+TEST_2 = VALUE
+```
+
+example_context.php
+```php
+<?php
+
+//both examples return the same thing
+
+// example 1 -- standard
+use M1\Env\Parser;
+
+$env = new Parser(file_get_contents('test_context.env'), array('EXTERNAL' => 'external'));
+$arr = $env->getContent();
+
+// example 2 -- statically
+$arr = Parser::parse(file_get_contents('test_context.env'), array('EXTERNAL' => 'external'));
+
+var_dump($arr);
+// [
+//      "TEST_1" => "external"
+//      "TEST_2" => "VALUE"
 // ]
 ```
 

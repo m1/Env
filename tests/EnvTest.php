@@ -294,6 +294,19 @@ class EnvTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($expected, $env);
     }
 
+    public function testContextVariables()
+    {
+        $expected = array(
+            'TK1' => 'external',
+            'TK2' => 'external',
+            'TK3' => 'TK2',
+            'TK4' => 'TK2-external',
+        );
+
+        $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/context_variables.env'), array('EXTERNAL' => 'external'));
+        $this->assertSame($expected, $env);
+    }
+
     /**
      * @expectedException \M1\Env\Exception\ParseException
      */

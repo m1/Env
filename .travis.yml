@@ -1,21 +1,36 @@
 language: php
 
-php:
-  - 5.3
-  - 5.4
-  - 5.5
-  - 5.6
-  - 7.0
-  - hhvm
-
 # This triggers builds to run on the new TravisCI infrastructure.
 # See: http://docs.travis-ci.com/user/workers/container-based-infrastructure/
 sudo: false
 
 matrix:
+  allow_failures:
+    - php: nightly
   include:
+    - php: 5.3
+      dist: precise
     - php: 5.4
+      dist: trusty
+    - php: 5.4
+      dist: trusty
       env: 'COMPOSER_FLAGS="--prefer-stable --prefer-lowest"'
+    - php: 5.5
+      dist: trusty
+    - php: 5.6
+      dist: trusty
+    - php: 7.0
+      dist: trusty
+    - php: 7.1
+      dist: trusty
+    - php: hhvm
+      dist: trusty
+    - php: nightly
+      dist: trusty
+
+cache:
+  directories:
+    - $HOME/.composer/cache/files
 
 before_script:
   - travis_retry composer self-update
