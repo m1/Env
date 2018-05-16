@@ -103,7 +103,7 @@ class Parser
      *
      * @return array The .env contents
      */
-    private function doParse($content)
+    protected function doParse($content)
     {
         $raw_lines = array_filter($this->makeLines($content), 'strlen');
 
