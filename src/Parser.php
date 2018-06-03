@@ -234,8 +234,12 @@ class Parser
      *
      * @return array The .env contents
      */
-    public function getContent()
+    public function getContent($keyName = null)
     {
-        return $this->lines;
+		if ($keyName !== null) {
+			return (array_key_exists($keyName, $this->lines)) ? $this->lines[$keyName] : null;
+		} else {
+			return $this->lines;
+		}
     }
 }
