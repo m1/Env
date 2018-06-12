@@ -236,10 +236,9 @@ class Parser
      */
     public function getContent($keyName = null)
     {
-		if ($keyName !== null) {
+		if (!is_null($keyName)) {
 			return (array_key_exists($keyName, $this->lines)) ? $this->lines[$keyName] : null;
-		} else {
-			return $this->lines;
 		}
+        return $this->lines;
     }
 }
