@@ -143,7 +143,9 @@ class Parser
         foreach ($raw_lines as $raw_line) {
             $this->line_num++;
 
-            if ($this->string_helper->startsWith('#', $raw_line) || !$raw_line) {
+            $line = trim($raw_line);
+
+            if ($this->string_helper->startsWith('#', $line) || !$line) {
                 continue;
             }
 
