@@ -31,6 +31,7 @@ class EnvTest extends \PHPUnit_Framework_TestCase
             'TK7' => "value \n 'value', \"value\" value",
             'TK8' => "",
             'TK9' => 'value',
+            'TK10' => 'value "value"',
         );
 
         $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/double_quoted.env'));
@@ -49,6 +50,7 @@ class EnvTest extends \PHPUnit_Framework_TestCase
             'TK7' => "value \n \"value\", 'value' value",
             'TK8' => '',
             'TK9' => 'value',
+            'TK10' => 'value \'value\'',
         );
 
         $env = Parser::Parse(file_get_contents(__DIR__.'/mocks/single_quoted.env'));
