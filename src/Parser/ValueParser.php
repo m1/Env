@@ -174,7 +174,10 @@ class ValueParser extends AbstractParser
 
         $matches = $this->fetchStringMatches($value, $regex, $symbol);
 
-        $value = trim($matches[0], $symbol);
+        $value = $matches[0];
+        if ($value !== '') {
+            $value = substr($value, 1, strlen($value) - 2);
+        }
         $value = strtr($value, self::$character_map);
 
         return ($single) ? $value : $this->variable_parser->parse($value, true);
