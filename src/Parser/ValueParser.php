@@ -64,6 +64,7 @@ class ValueParser extends AbstractParser
         "\\n" => "\n",
         "\\\"" => "\"",
         '\\\'' => "'",
+        '\\\\' => "\\",
         '\\t' => "\t"
     );
 
